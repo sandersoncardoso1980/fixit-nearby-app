@@ -1,4 +1,10 @@
-export const DEFAULT_CENTER = { lat: -23.5613, lng: -46.6565 };
+/** O ServiçoJá atende exclusivamente Entre Rios de Minas (MG). */
+export const CITY_NAME = "Entre Rios de Minas";
+export const CITY_STATE = "MG";
+export const CITY_LABEL = `${CITY_NAME}, ${CITY_STATE}`;
+
+/** Sede do município: 20°40′15″ S, 44°03′57″ O */
+export const DEFAULT_CENTER = { lat: -20.6708, lng: -44.0658 };
 
 export function distanceKm(
   a: { lat: number; lng: number },
