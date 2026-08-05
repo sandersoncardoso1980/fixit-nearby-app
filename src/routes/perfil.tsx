@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { CITY_NAME } from "@/lib/geo";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
@@ -33,7 +34,7 @@ function Perfil() {
     if (!profile) return;
     setFullName(profile.full_name);
     setPhone(profile.phone ?? "");
-    setCity(profile.city ?? "");
+    setCity(profile.city ?? CITY_NAME);
     setBio(profile.bio ?? "");
     setRate(profile.hourly_rate ? String(profile.hourly_rate) : "");
   }, [profile]);

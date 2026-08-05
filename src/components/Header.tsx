@@ -14,12 +14,12 @@ import { useTheme } from "@/lib/theme";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function Header() {
-  const { profile, userId, signOut } = useAuth();
+  const { profile, userId, isAdmin, signOut } = useAuth();
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const links =
+  const baseLinks =
     profile?.role === "provider"
       ? [
           { to: "/", label: "Explorar" },
@@ -29,6 +29,8 @@ export function Header() {
           { to: "/", label: "Explorar" },
           { to: "/pedidos", label: "Meus pedidos" },
         ];
+
+  const links = isAdmin ? [...baseLinks, { to: "/admin", label: "Admin" }] : baseLinks;
 
   async function handleSignOut() {
     await qc.cancelQueries();

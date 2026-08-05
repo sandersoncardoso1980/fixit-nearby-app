@@ -13,7 +13,7 @@ import { CompareDialog } from "@/components/CompareDialog";
 import { PriceCalculator } from "@/components/PriceCalculator";
 import { RequestDialog } from "@/components/RequestDialog";
 import { categoriesQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
-import { DEFAULT_CENTER, distanceKm } from "@/lib/geo";
+import { CITY_LABEL, CITY_NAME, DEFAULT_CENTER, distanceKm } from "@/lib/geo";
 import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ function Home() {
   const { data: links = [] } = useQuery(providerCategoriesQuery);
 
   const [search, setSearch] = useState("");
-  const [city, setCity] = useState("São Paulo, SP");
+  const city = CITY_LABEL;
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [radius, setRadius] = useState(10);
   const [sort, setSort] = useState<SortKey>("rating");
@@ -137,12 +137,7 @@ function Home() {
             </div>
             <div className="flex min-w-0 items-center gap-2 rounded-xl px-3 sm:border-l">
               <MapPin className="size-4 shrink-0 text-muted-foreground" />
-              <Input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Cidade ou CEP"
-                className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-              />
+              <span className="truncate text-sm font-medium">{city}</span>
             </div>
             <Button
               variant="brand"
@@ -208,7 +203,7 @@ function Home() {
             <div className="overflow-hidden rounded-2xl border shadow-soft">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b bg-card px-4 py-3">
                 <p className="min-w-0 truncate text-sm font-semibold">
-                  Prestadores em {city.split(",")[0]}
+                  Prestadores em {CITY_NAME}
                 </p>
                 <div className="flex shrink-0 gap-1">
                   {RADII.map((r) => (
