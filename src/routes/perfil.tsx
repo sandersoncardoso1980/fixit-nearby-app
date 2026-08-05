@@ -33,7 +33,7 @@ function Perfil() {
     if (!profile) return;
     setFullName(profile.full_name);
     setPhone(profile.phone ?? "");
-    setCity(profile.city ?? "");
+    setCity(profile.city ?? CITY_NAME);
     setBio(profile.bio ?? "");
     setRate(profile.hourly_rate ? String(profile.hourly_rate) : "");
   }, [profile]);
