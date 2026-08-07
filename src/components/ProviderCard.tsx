@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, Briefcase } from "lucide-react";
+import { BadgeCheck, Briefcase, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StarRating } from "@/components/StarRating";
 import { brl } from "@/lib/geo";
 import type { Category, Profile } from "@/lib/types";
+import { isProActive } from "@/lib/pro";
 import { cn } from "@/lib/utils";
 
 export function ProviderCard({
@@ -21,13 +22,16 @@ export function ProviderCard({
   onToggleCompare: () => void;
   onHire: () => void;
 }) {
+  const pro = isProActive(provider);
   return (
     <article
       className={cn(
-        "group flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft transition-all hover:shadow-lift",
+        "group relative flex flex-col gap-3 overflow-hidden rounded-2xl border bg-card p-4 shadow-soft transition-all hover:shadow-lift",
+        pro && "border-brand/50",
         selected && "border-primary ring-1 ring-primary",
       )}
     >
+      {pro && <span className="absolute inset-x-0 top-0 h-1 bg-gradient-hero" />}
       <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3">
         <div className="relative shrink-0">
           <img
@@ -44,7 +48,10 @@ export function ProviderCard({
           />
         </div>
         <div className="min-w-0">
-          <h3 className="truncate font-semibold">{provider.full_name}</h3>
+          <div className="flex items-center gap-1.5">
+            <h3 className="truncate font-semibold">{provider.full_name}</h3>
+            {provider.is_verified && <BadgeCheck className="size-4 shrink-0 text-brand" />}
+          </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <StarRating value={provider.rating_avg} size={12} />
@@ -66,6 +73,16 @@ export function ProviderCard({
       <p className="line-clamp-2 text-sm text-muted-foreground">{provider.bio}</p>
 
       <div className="flex flex-wrap gap-1.5">
+        {pro && (
+          <Badge className="gap-1 border-0 bg-gradient-hero text-white">
+            <Crown className="size-3" /> PRO
+          </Badge>
+        )}
+        {provider.is_verified && (
+          <Badge variant="secondary" className="gap-1 font-normal">
+            <BadgeCheck className="size-3" /> Verificado
+          </Badge>
+        )}
         {categories.map((c) => (
           <Badge key={c.id} variant="secondary" className="font-normal">
             {c.name}

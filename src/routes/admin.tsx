@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, ShieldAlert } from "lucide-react";
+import { Pencil, Plus, Trash2, ShieldAlert, Crown, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { categoriesQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
+import { categoriesQuery, proRequestsQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
+import { isProActive } from "@/lib/pro";
 import { brl, CITY_NAME } from "@/lib/geo";
 import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -82,6 +83,7 @@ function AdminPage() {
   const { data: providers = [], isLoading } = useQuery(providersQuery);
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: links = [] } = useQuery(providerCategoriesQuery);
+  const { data: proRequests = [] } = useQuery(proRequestsQuery);
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Profile | null>(null);
@@ -119,8 +121,36 @@ function AdminPage() {
     }
   }, [open, editing, catsByProvider]);
 
+  async function setPro(p: Profile, on: boolean) {
+    const expires = on ? new Date(Date.now() + 30 * 864e5).toISOString() : null;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_pro: on, is_verified: on ? true : p.is_verified, pro_expires_at: expires })
+      .eq("id", p.id);
+    if (error) {
+      toast.error("Não foi possível atualizar o PRO.");
+      return;
+    }
+    toast.success(on ? "PRO ativado por 30 dias." : "PRO desativado.");
+    refresh();
+  }
+
+  async function resolveRequest(id: string, status: "approved" | "rejected", providerId: string) {
+    const { error } = await supabase.from("pro_requests").update({ status }).eq("id", id);
+    if (error) {
+      toast.error("Não foi possível atualizar a solicitação.");
+      return;
+    }
+    if (status === "approved") {
+      const target = providers.find((x) => x.id === providerId);
+      if (target) await setPro(target, true);
+    }
+    void qc.invalidateQueries({ queryKey: ["pro-requests"] });
+  }
+
   function refresh() {
     void qc.invalidateQueries({ queryKey: ["providers"] });
+    void qc.invalidateQueries({ queryKey: ["pro-providers"] });
     void qc.invalidateQueries({ queryKey: ["provider-categories"] });
   }
 
@@ -283,9 +313,27 @@ function AdminPage() {
                   </Badge>
                 ))}
                 {p.is_online && <Badge className="text-[10px]">Online</Badge>}
+                {isProActive(p) && (
+                  <Badge className="gap-1 border-0 bg-gradient-hero text-[10px] text-white">
+                    <Crown className="size-3" /> PRO
+                  </Badge>
+                )}
+                {p.is_verified && (
+                  <Badge variant="outline" className="gap-1 text-[10px]">
+                    <BadgeCheck className="size-3" /> Verificado
+                  </Badge>
+                )}
               </div>
             </div>
-            <div className="flex shrink-0 gap-1">
+            <div className="flex shrink-0 items-center gap-1">
+              <label className="mr-1 hidden items-center gap-1.5 text-[11px] font-medium text-muted-foreground sm:flex">
+                PRO
+                <Switch
+                  checked={isProActive(p)}
+                  onCheckedChange={(v) => void setPro(p, v)}
+                  aria-label={`Alternar PRO de ${p.full_name}`}
+                />
+              </label>
               <Button
                 variant="ghost"
                 size="icon"
@@ -309,6 +357,48 @@ function AdminPage() {
           </div>
         ))}
       </div>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-bold">Solicitações do plano PRO</h2>
+        <p className="text-sm text-muted-foreground">
+          Confirme o Pix de R$ 19,90 e aprove para ativar o destaque por 30 dias.
+        </p>
+        <div className="mt-4 space-y-3">
+          {proRequests.length === 0 && (
+            <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+              Nenhuma solicitação recebida.
+            </p>
+          )}
+          {proRequests.map((r) => {
+            const prov = providers.find((p) => p.id === r.provider_id);
+            return (
+              <div
+                key={r.id}
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{prov?.full_name ?? "Profissional"}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {r.contact_phone ?? "sem telefone"} ·{" "}
+                    {new Date(r.created_at).toLocaleDateString("pt-BR")} · {r.status}
+                  </p>
+                  {r.message && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{r.message}</p>}
+                </div>
+                {r.status === "pending" && (
+                  <div className="flex shrink-0 gap-2">
+                    <Button size="sm" variant="brand" onClick={() => void resolveRequest(r.id, "approved", r.provider_id)}>
+                      Aprovar
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => void resolveRequest(r.id, "rejected", r.provider_id)}>
+                      Recusar
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">

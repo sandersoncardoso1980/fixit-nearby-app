@@ -80,22 +80,68 @@ export type Database = {
           },
         ]
       }
+      pro_requests: {
+        Row: {
+          admin_note: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          message: string | null
+          provider_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          provider_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          provider_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_requests_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
           city: string | null
+          contact_count: number
           coverage_radius_km: number
           created_at: string
           full_name: string
           hourly_rate: number | null
           id: string
           is_online: boolean
+          is_pro: boolean
+          is_verified: boolean
           jobs_done: number
           latitude: number | null
           longitude: number | null
           phone: string | null
           portfolio: string[]
+          pro_expires_at: string | null
+          profile_views: number
           rating_avg: number
           role: Database["public"]["Enums"]["app_role"]
           total_reviews: number
@@ -105,17 +151,22 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          contact_count?: number
           coverage_radius_km?: number
           created_at?: string
           full_name?: string
           hourly_rate?: number | null
           id?: string
           is_online?: boolean
+          is_pro?: boolean
+          is_verified?: boolean
           jobs_done?: number
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
           portfolio?: string[]
+          pro_expires_at?: string | null
+          profile_views?: number
           rating_avg?: number
           role?: Database["public"]["Enums"]["app_role"]
           total_reviews?: number
@@ -125,17 +176,22 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          contact_count?: number
           coverage_radius_km?: number
           created_at?: string
           full_name?: string
           hourly_rate?: number | null
           id?: string
           is_online?: boolean
+          is_pro?: boolean
+          is_verified?: boolean
           jobs_done?: number
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
           portfolio?: string[]
+          pro_expires_at?: string | null
+          profile_views?: number
           rating_avg?: number
           role?: Database["public"]["Enums"]["app_role"]
           total_reviews?: number
@@ -328,6 +384,11 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      register_contact: { Args: { _provider_id: string }; Returns: undefined }
+      register_profile_view: {
+        Args: { _provider_id: string }
+        Returns: undefined
       }
     }
     Enums: {

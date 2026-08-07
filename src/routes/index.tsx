@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, MapPin, SlidersHorizontal, Scale, X, ShieldCheck, Clock, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { ProviderCard } from "@/components/ProviderCard";
+import { ProBanner } from "@/components/ProBanner";
 import { CompareDialog } from "@/components/CompareDialog";
 import { PriceCalculator } from "@/components/PriceCalculator";
 import { RequestDialog } from "@/components/RequestDialog";
-import { categoriesQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
+import { categoriesQuery, proProvidersQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
+import { isProActive } from "@/lib/pro";
+import { supabase } from "@/integrations/supabase/client";
 import { CITY_LABEL, CITY_NAME } from "@/lib/geo";
 import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -50,6 +53,7 @@ function Home() {
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: providers = [], isLoading } = useQuery(providersQuery);
   const { data: links = [] } = useQuery(providerCategoriesQuery);
+  const { data: proProviders = [] } = useQuery(proProvidersQuery);
 
   const [search, setSearch] = useState("");
   const city = CITY_LABEL;
@@ -82,6 +86,8 @@ function Home() {
     });
 
     return [...list].sort((a, b) => {
+      const proDiff = Number(isProActive(b)) - Number(isProActive(a));
+      if (proDiff !== 0) return proDiff;
       if (sort === "price") return (a.hourly_rate ?? 1e9) - (b.hourly_rate ?? 1e9);
       if (sort === "jobs") return b.jobs_done - a.jobs_done;
       return b.rating_avg - a.rating_avg;
@@ -89,6 +95,12 @@ function Home() {
   }, [providers, categoryId, catsByProvider, sort, search, categories]);
 
   const compareProviders = providers.filter((p) => compare.includes(p.id));
+
+  function startHire(p: Profile | null) {
+    setHireTarget(p);
+    setRequestOpen(true);
+    if (p) void supabase.rpc("register_contact", { _provider_id: p.id });
+  }
 
   function toggleCompare(id: string) {
     setCompare((prev) =>
@@ -147,6 +159,13 @@ function Home() {
           </ul>
         </div>
       </section>
+
+      <ProBanner
+        providers={proProviders}
+        categories={categories}
+        links={links}
+        onHire={(p) => startHire(p)}
+      />
 
       {/* Categorias */}
       <section className="mx-auto max-w-6xl px-4 py-10">
@@ -223,10 +242,7 @@ function Home() {
                     )}
                     selected={compare.includes(p.id)}
                     onToggleCompare={() => toggleCompare(p.id)}
-                    onHire={() => {
-                      setHireTarget(p);
-                      setRequestOpen(true);
-                    }}
+                    onHire={() => startHire(p)}
                   />
                 ))}
             </div>
@@ -240,6 +256,15 @@ function Home() {
 
           <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
             <PriceCalculator categories={categories} />
+            <div className="rounded-2xl border border-brand/40 bg-gradient-hero p-4 text-white shadow-soft">
+              <h3 className="text-sm font-semibold">É profissional? Seja PRO</h3>
+              <p className="mt-1 text-xs text-white/85">
+                Destaque na tela inicial, selo de verificado e prioridade nas buscas por R$ 19,90/mês.
+              </p>
+              <Button asChild className="mt-3 w-full" variant="secondary">
+                <Link to="/pro">Conhecer o plano PRO</Link>
+              </Button>
+            </div>
             <div className="rounded-2xl border bg-card p-4 shadow-soft">
               <h3 className="text-sm font-semibold">Não sabe quem chamar?</h3>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -248,10 +273,7 @@ function Home() {
               <Button
                 className="mt-3 w-full"
                 variant="outline"
-                onClick={() => {
-                  setHireTarget(null);
-                  setRequestOpen(true);
-                }}
+                onClick={() => startHire(null)}
               >
                 Publicar chamado aberto
               </Button>

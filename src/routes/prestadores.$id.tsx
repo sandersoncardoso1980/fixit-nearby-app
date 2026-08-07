@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { BadgeCheck, Clock } from "lucide-react";
+import { BadgeCheck, Clock, Crown, Eye, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,6 +9,8 @@ import { StarRating } from "@/components/StarRating";
 import { RequestDialog } from "@/components/RequestDialog";
 import { categoriesQuery, providerCategoriesQuery, providerQuery, reviewsQuery } from "@/lib/queries";
 import { brl, CITY_LABEL } from "@/lib/geo";
+import { isProActive } from "@/lib/pro";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/prestadores/$id")({
   head: () => ({
@@ -33,10 +35,15 @@ function ProviderProfile() {
   const { data: links = [] } = useQuery(providerCategoriesQuery);
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    void supabase.rpc("register_profile_view", { _provider_id: id });
+  }, [id]);
+
   if (isLoading) return <Skeleton className="mx-4 my-10 h-96 rounded-2xl" />;
   if (!provider)
     return <p className="px-4 py-20 text-center text-muted-foreground">Profissional não encontrado.</p>;
 
+  const pro = isProActive(provider);
   const cats = categories.filter((c) =>
     links.some((l) => l.provider_id === provider.id && l.category_id === c.id),
   );
@@ -53,8 +60,13 @@ function ProviderProfile() {
           <div className="min-w-0">
             <h1 className="flex items-center gap-2 truncate text-xl font-extrabold">
               {provider.full_name}
-              <BadgeCheck className="size-4 shrink-0 text-brand" />
+              {provider.is_verified && <BadgeCheck className="size-4 shrink-0 text-brand" />}
             </h1>
+            {pro && (
+              <Badge className="mt-1 gap-1 border-0 bg-gradient-hero text-white">
+                <Crown className="size-3" /> PRO — recomendado
+              </Badge>
+            )}
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <StarRating value={provider.rating_avg} size={14} /> {provider.rating_avg.toFixed(1)} (
@@ -77,12 +89,35 @@ function ProviderProfile() {
 
         {provider.bio && <p className="mt-4 text-sm text-muted-foreground">{provider.bio}</p>}
 
+        {pro && (
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <p className="rounded-xl border bg-card p-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Eye className="size-3.5" /> Visualizações
+              </span>
+              <strong className="mt-0.5 block text-lg text-foreground">{provider.profile_views}</strong>
+            </p>
+            <p className="rounded-xl border bg-card p-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Phone className="size-3.5" /> Contatos recebidos
+              </span>
+              <strong className="mt-0.5 block text-lg text-foreground">{provider.contact_count}</strong>
+            </p>
+          </div>
+        )}
+
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t pt-4">
           <p className="min-w-0 truncate text-sm">
             <span className="text-lg font-extrabold">{brl(provider.hourly_rate)}</span>
             <span className="text-muted-foreground"> /hora</span>
           </p>
-          <Button variant="brand" onClick={() => setOpen(true)}>
+          <Button
+            variant="brand"
+            onClick={() => {
+              void supabase.rpc("register_contact", { _provider_id: provider.id });
+              setOpen(true);
+            }}
+          >
             Solicitar orçamento
           </Button>
         </div>
