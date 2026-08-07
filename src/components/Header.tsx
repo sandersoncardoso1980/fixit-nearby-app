@@ -24,10 +24,12 @@ export function Header() {
       ? [
           { to: "/", label: "Explorar" },
           { to: "/prestador", label: "Painel do prestador" },
+          { to: "/pro", label: "Plano PRO" },
         ]
       : [
           { to: "/", label: "Explorar" },
           { to: "/pedidos", label: "Meus pedidos" },
+          { to: "/pro", label: "Plano PRO" },
         ];
 
   const links = isAdmin ? [...baseLinks, { to: "/admin", label: "Admin" }] : baseLinks;
