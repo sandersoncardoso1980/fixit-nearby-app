@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { useMemo, useState } from "react";
-=======
 import { useMemo, useState, useEffect, useRef } from "react";
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, MapPin, SlidersHorizontal, Scale, X, ShieldCheck, Clock, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
@@ -53,8 +49,6 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "online", label: "Disponível agora" },
 ];
 
-<<<<<<< HEAD
-=======
 // Dados de exemplo para o carrossel - substitua pelos seus anúncios reais
 const CAROUSEL_ITEMS = [
   {
@@ -95,7 +89,6 @@ const CAROUSEL_ITEMS = [
   },
 ];
 
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
 function Home() {
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: providers = [], isLoading } = useQuery(providersQuery);
@@ -115,11 +108,7 @@ function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
 
-<<<<<<< HEAD
-=======
   // Estado do carrossel de categorias
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -156,38 +145,6 @@ function Home() {
   const goToNext = () => {
     setCurrentSlide((prev) => (prev + 1) % CAROUSEL_ITEMS.length);
     handleUserInteraction();
-  };
-
-  // Touch handlers para mobile (CORRIGIDOS)
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    try {
-      const touch = e.touches?.[0];
-      if (touch) {
-        touchStartX.current = touch.clientX;
-      }
-    } catch (error) {
-      console.warn('Touch start error:', error);
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    try {
-      const touch = e.changedTouches?.[0];
-      if (touch) {
-        touchEndX.current = touch.clientX;
-        const diff = touchStartX.current - touchEndX.current;
-        
-        if (Math.abs(diff) > 50) {
-          if (diff > 0) {
-            goToNext();
-          } else {
-            goToPrev();
-          }
-        }
-      }
-    } catch (error) {
-      console.warn('Touch end error:', error);
-    }
   };
 
   // Funções para rolagem horizontal das categorias
@@ -227,7 +184,6 @@ function Home() {
     setTimeout(checkArrowsVisibility, 100);
   }, [categories]);
 
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
   const catsByProvider = useMemo(() => {
     const map: Record<string, string[]> = {};
     for (const l of links) (map[l.provider_id] ??= []).push(l.category_id);
@@ -260,18 +216,10 @@ function Home() {
 
   const compareProviders = providers.filter((p) => compare.includes(p.id));
 
-<<<<<<< HEAD
   function startHire(p: Profile | null) {
     setHireTarget(p);
     setRequestOpen(true);
-    if (p) void supabase.rpc("register_contact", { _provider_id: p.id });
-=======
-  // CORRIGIDO: Função startHire sem RPC
-  function startHire(p: Profile | null) {
-    setHireTarget(p);
-    setRequestOpen(true);
-    // Removida a chamada RPC que causava erro
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
+    // Removida chamada RPC que causava erro
   }
 
   function toggleCompare(id: string) {
@@ -284,13 +232,8 @@ function Home() {
     <>
       {/* HERO SECTION */}
       <section className="bg-gradient-hero text-white">
-<<<<<<< HEAD
-        <div className="mx-auto max-w-6xl px-4 py-12 md:py-20">
-          <Badge className="mb-4 border-0 bg-white/15 text-white hover:bg-white/15">
-=======
         <div className="mx-auto max-w-6xl px-3 sm:px-4 py-8 sm:py-12 md:py-20">
           <Badge className="mb-3 sm:mb-4 border-0 bg-white/15 text-white hover:bg-white/15 text-xs sm:text-sm">
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
             Profissionais verificados da cidade
           </Badge>
           <h1 className="max-w-2xl text-2xl sm:text-3xl md:text-5xl font-extrabold leading-tight">
@@ -338,15 +281,11 @@ function Home() {
         </div>
       </section>
 
-<<<<<<< HEAD
-=======
       {/* CARROSSEL DE ANÚNCIOS */}
       <section className="mx-auto max-w-6xl px-3 sm:px-4 -mt-1 sm:-mt-2 relative z-10">
         <div 
           ref={carouselRef}
           className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
         >
           <div 
             className="flex transition-transform duration-500 ease-out"
@@ -422,7 +361,6 @@ function Home() {
         </div>
       </section>
 
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
       <ProBanner
         providers={proProviders}
         categories={categories}
@@ -430,12 +368,6 @@ function Home() {
         onHire={(p) => startHire(p)}
       />
 
-<<<<<<< HEAD
-      {/* Categorias */}
-      <section className="mx-auto max-w-6xl px-4 py-10">
-        <h2 className="text-lg font-bold">Categorias</h2>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-=======
       {/* CARROSSEL DE CATEGORIAS - COM ROLAGEM HORIZONTAL */}
       <section className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-10">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -469,7 +401,6 @@ function Home() {
           onScroll={checkArrowsVisibility}
           style={{ scrollbarWidth: 'none' }}
         >
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
           {categories.map((c) => {
             const active = categoryId === c.id;
             return (
@@ -501,15 +432,9 @@ function Home() {
       </section>
 
       {/* Resultados */}
-<<<<<<< HEAD
-      <section id="resultados" className="mx-auto max-w-6xl px-4 pb-16">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="space-y-4">
-=======
       <section id="resultados" className="mx-auto max-w-6xl px-3 sm:px-4 pb-12 sm:pb-16">
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="space-y-3 sm:space-y-4">
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-semibold">
                 Prestadores em {CITY_NAME} ({filtered.length})
@@ -543,10 +468,6 @@ function Home() {
                   <ProviderCard
                     key={p.id}
                     provider={p}
-<<<<<<< HEAD
-=======
-                    distance={0}
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
                     categories={categories.filter((c) =>
                       (catsByProvider[p.id] ?? []).includes(c.id),
                     )}
@@ -558,11 +479,7 @@ function Home() {
             </div>
 
             {!isLoading && filtered.length === 0 && (
-<<<<<<< HEAD
-              <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-=======
               <div className="rounded-2xl border border-dashed p-8 sm:p-10 text-center text-sm text-muted-foreground">
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
                 Nenhum profissional encontrado com esses filtros.
               </div>
             )}
@@ -570,22 +487,11 @@ function Home() {
 
           <aside className="space-y-3 sm:space-y-4 lg:sticky lg:top-20 lg:self-start">
             <PriceCalculator categories={categories} />
-<<<<<<< HEAD
-            <div className="rounded-2xl border border-brand/40 bg-gradient-hero p-4 text-white shadow-soft">
-=======
             <div className="rounded-2xl border border-brand/40 bg-gradient-hero p-3 sm:p-4 text-white shadow-soft">
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
               <h3 className="text-sm font-semibold">É profissional? Seja PRO</h3>
               <p className="mt-1 text-xs text-white/85">
                 Destaque na tela inicial, selo de verificado e prioridade nas buscas por R$ 19,90/mês.
               </p>
-<<<<<<< HEAD
-              <Button asChild className="mt-3 w-full" variant="secondary">
-                <Link to="/pro">Conhecer o plano PRO</Link>
-              </Button>
-            </div>
-            <div className="rounded-2xl border bg-card p-4 shadow-soft">
-=======
               <a href="/pro">
                 <Button className="mt-3 w-full" variant="secondary" size="sm">
                   Conhecer o plano PRO
@@ -593,7 +499,6 @@ function Home() {
               </a>
             </div>
             <div className="rounded-2xl border bg-card p-3 sm:p-4 shadow-soft">
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
               <h3 className="text-sm font-semibold">Não sabe quem chamar?</h3>
               <p className="mt-1 text-xs text-muted-foreground">
                 Publique um chamado aberto e receba propostas dos prestadores da cidade.
@@ -601,10 +506,7 @@ function Home() {
               <Button
                 className="mt-3 w-full text-xs sm:text-sm"
                 variant="outline"
-<<<<<<< HEAD
-=======
                 size="sm"
->>>>>>> 9073af7 (feat: adiciona carrossel de anúncios e categorias com rolagem horizontal)
                 onClick={() => startHire(null)}
               >
                 Publicar chamado aberto
