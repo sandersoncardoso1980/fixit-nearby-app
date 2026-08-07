@@ -31,7 +31,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { categoriesQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
-import { brl, CITY_NAME, DEFAULT_CENTER } from "@/lib/geo";
+import { brl, CITY_NAME } from "@/lib/geo";
 import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -62,9 +62,6 @@ type FormState = {
   bio: string;
   avatar_url: string;
   hourly_rate: string;
-  latitude: string;
-  longitude: string;
-  coverage_radius_km: string;
   is_online: boolean;
   categoryIds: string[];
 };
@@ -75,9 +72,6 @@ const EMPTY: FormState = {
   bio: "",
   avatar_url: "",
   hourly_rate: "",
-  latitude: String(DEFAULT_CENTER.lat),
-  longitude: String(DEFAULT_CENTER.lng),
-  coverage_radius_km: "15",
   is_online: false,
   categoryIds: [],
 };
@@ -117,9 +111,6 @@ function AdminPage() {
         bio: editing.bio ?? "",
         avatar_url: editing.avatar_url ?? "",
         hourly_rate: editing.hourly_rate == null ? "" : String(editing.hourly_rate),
-        latitude: String(editing.latitude ?? DEFAULT_CENTER.lat),
-        longitude: String(editing.longitude ?? DEFAULT_CENTER.lng),
-        coverage_radius_km: String(editing.coverage_radius_km ?? 15),
         is_online: !!editing.is_online,
         categoryIds: catsByProvider[editing.id] ?? [],
       });
@@ -166,9 +157,6 @@ function AdminPage() {
         bio: form.bio.trim() || null,
         avatar_url: form.avatar_url.trim() || null,
         hourly_rate: form.hourly_rate ? Number(form.hourly_rate) : null,
-        latitude: Number(form.latitude) || DEFAULT_CENTER.lat,
-        longitude: Number(form.longitude) || DEFAULT_CENTER.lng,
-        coverage_radius_km: Number(form.coverage_radius_km) || 15,
         is_online: form.is_online,
         city: CITY_NAME,
       };
@@ -375,35 +363,6 @@ function AdminPage() {
                 onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="grid gap-1.5">
-                <Label htmlFor="lat">Latitude</Label>
-                <Input
-                  id="lat"
-                  value={form.latitude}
-                  onChange={(e) => setForm((f) => ({ ...f, latitude: e.target.value }))}
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="lng">Longitude</Label>
-                <Input
-                  id="lng"
-                  value={form.longitude}
-                  onChange={(e) => setForm((f) => ({ ...f, longitude: e.target.value }))}
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="raio">Raio (km)</Label>
-                <Input
-                  id="raio"
-                  type="number"
-                  min={1}
-                  value={form.coverage_radius_km}
-                  onChange={(e) => setForm((f) => ({ ...f, coverage_radius_km: e.target.value }))}
-                />
-              </div>
-            </div>
-
             <div className="grid gap-1.5">
               <Label>Categorias</Label>
               <div className="flex flex-wrap gap-2">

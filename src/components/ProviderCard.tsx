@@ -1,23 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, BadgeCheck, Briefcase } from "lucide-react";
+import { BadgeCheck, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StarRating } from "@/components/StarRating";
-import { brl, formatKm } from "@/lib/geo";
+import { brl } from "@/lib/geo";
 import type { Category, Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function ProviderCard({
   provider,
-  distance,
   categories,
   selected,
   onToggleCompare,
   onHire,
 }: {
   provider: Profile;
-  distance: number;
   categories: Category[];
   selected: boolean;
   onToggleCompare: () => void;
@@ -56,10 +54,6 @@ export function ProviderCard({
             <span className="flex items-center gap-1">
               <Briefcase className="size-3" />
               {provider.jobs_done} serviços
-            </span>
-            <span className="flex items-center gap-1">
-              <MapPin className="size-3" />
-              {formatKm(distance)}
             </span>
           </div>
         </div>

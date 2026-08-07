@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, MapPin, SlidersHorizontal, Scale, X, ShieldCheck, Clock, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,47 +8,45 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { ProviderCard } from "@/components/ProviderCard";
-import { ProviderMap } from "@/components/ProviderMap";
 import { CompareDialog } from "@/components/CompareDialog";
 import { PriceCalculator } from "@/components/PriceCalculator";
 import { RequestDialog } from "@/components/RequestDialog";
 import { categoriesQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
-import { CITY_LABEL, CITY_NAME, DEFAULT_CENTER, distanceKm } from "@/lib/geo";
+import { CITY_LABEL, CITY_NAME } from "@/lib/geo";
 import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ServiçoJá — Encontre profissionais perto de você" },
+      { title: "ServiçoJá — Profissionais em Entre Rios de Minas" },
       {
         name: "description",
         content:
-          "Eletricistas, encanadores, pintores, chaveiros e diaristas por perto. Compare preço, distância e avaliação e contrate em minutos.",
+          "Pedreiros, pintores, eletricistas, encanadores, marceneiros, diaristas e mais em Entre Rios de Minas. Compare preço e avaliação e contrate em minutos.",
       },
-      { property: "og:title", content: "ServiçoJá — Encontre profissionais perto de você" },
+      { property: "og:title", content: "ServiçoJá — Profissionais em Entre Rios de Minas" },
       {
         property: "og:description",
-        content: "Compare preço, distância e avaliação de prestadores locais e contrate em minutos.",
+        content: "Compare preço e avaliação de prestadores locais e contrate em minutos.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Home,
 });
 
-type SortKey = "rating" | "price" | "distance" | "online";
+type SortKey = "rating" | "price" | "jobs" | "online";
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "rating", label: "Melhor avaliado" },
   { key: "price", label: "Menor preço/hora" },
-  { key: "distance", label: "Mais próximo" },
+  { key: "jobs", label: "Mais experiente" },
   { key: "online", label: "Disponível agora" },
 ];
 
-const RADII = [5, 10, 20];
-
 function Home() {
-  const navigate = useNavigate();
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: providers = [], isLoading } = useQuery(providersQuery);
   const { data: links = [] } = useQuery(providerCategoriesQuery);
@@ -56,22 +54,11 @@ function Home() {
   const [search, setSearch] = useState("");
   const city = CITY_LABEL;
   const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [radius, setRadius] = useState(10);
   const [sort, setSort] = useState<SortKey>("rating");
   const [compare, setCompare] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [hireTarget, setHireTarget] = useState<Profile | null>(null);
   const [requestOpen, setRequestOpen] = useState(false);
-
-  const center = DEFAULT_CENTER;
-
-  const distances = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const p of providers) {
-      map[p.id] = distanceKm(center, { lat: p.latitude, lng: p.longitude });
-    }
-    return map;
-  }, [providers, center]);
 
   const catsByProvider = useMemo(() => {
     const map: Record<string, string[]> = {};
@@ -82,7 +69,6 @@ function Home() {
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     const list = providers.filter((p) => {
-      if ((distances[p.id] ?? Infinity) > radius) return false;
       if (categoryId && !(catsByProvider[p.id] ?? []).includes(categoryId)) return false;
       if (sort === "online" && !p.is_online) return false;
       if (term) {
@@ -97,10 +83,10 @@ function Home() {
 
     return [...list].sort((a, b) => {
       if (sort === "price") return (a.hourly_rate ?? 1e9) - (b.hourly_rate ?? 1e9);
-      if (sort === "distance") return (distances[a.id] ?? 1e9) - (distances[b.id] ?? 1e9);
+      if (sort === "jobs") return b.jobs_done - a.jobs_done;
       return b.rating_avg - a.rating_avg;
     });
-  }, [providers, distances, radius, categoryId, catsByProvider, sort, search, categories]);
+  }, [providers, categoryId, catsByProvider, sort, search, categories]);
 
   const compareProviders = providers.filter((p) => compare.includes(p.id));
 
@@ -116,7 +102,7 @@ function Home() {
       <section className="bg-gradient-hero text-white">
         <div className="mx-auto max-w-6xl px-4 py-12 md:py-20">
           <Badge className="mb-4 border-0 bg-white/15 text-white hover:bg-white/15">
-            +1.200 profissionais verificados
+            Profissionais verificados da cidade
           </Badge>
           <h1 className="max-w-2xl text-balance-tight text-3xl font-extrabold leading-tight md:text-5xl">
             Um profissional de confiança, a poucos minutos de você.
@@ -196,36 +182,14 @@ function Home() {
         </div>
       </section>
 
-      {/* Mapa + filtros */}
+      {/* Resultados */}
       <section id="resultados" className="mx-auto max-w-6xl px-4 pb-16">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-2xl border shadow-soft">
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b bg-card px-4 py-3">
-                <p className="min-w-0 truncate text-sm font-semibold">
-                  Prestadores em {CITY_NAME}
-                </p>
-                <div className="flex shrink-0 gap-1">
-                  {RADII.map((r) => (
-                    <Button
-                      key={r}
-                      size="sm"
-                      variant={radius === r ? "default" : "outline"}
-                      onClick={() => setRadius(r)}
-                    >
-                      {r} km
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <div className="h-[320px] w-full md:h-[380px]">
-                <ProviderMap
-                  center={center}
-                  radiusKm={radius}
-                  providers={filtered}
-                  onSelect={(id) => navigate({ to: "/prestadores/$id", params: { id } })}
-                />
-              </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold">
+                Prestadores em {CITY_NAME} ({filtered.length})
+              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -254,7 +218,6 @@ function Home() {
                   <ProviderCard
                     key={p.id}
                     provider={p}
-                    distance={distances[p.id] ?? Infinity}
                     categories={categories.filter((c) =>
                       (catsByProvider[p.id] ?? []).includes(c.id),
                     )}
@@ -270,7 +233,7 @@ function Home() {
 
             {!isLoading && filtered.length === 0 && (
               <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-                Nenhum profissional encontrado com esses filtros. Aumente o raio de busca.
+                Nenhum profissional encontrado com esses filtros.
               </div>
             )}
           </div>
@@ -280,7 +243,7 @@ function Home() {
             <div className="rounded-2xl border bg-card p-4 shadow-soft">
               <h3 className="text-sm font-semibold">Não sabe quem chamar?</h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Publique um chamado aberto e receba propostas dos prestadores da sua região.
+                Publique um chamado aberto e receba propostas dos prestadores da cidade.
               </p>
               <Button
                 className="mt-3 w-full"
@@ -327,12 +290,7 @@ function Home() {
         </div>
       )}
 
-      <CompareDialog
-        providers={compareProviders}
-        distances={distances}
-        open={compareOpen}
-        onOpenChange={setCompareOpen}
-      />
+      <CompareDialog providers={compareProviders} open={compareOpen} onOpenChange={setCompareOpen} />
       <RequestDialog
         provider={hireTarget}
         categories={categories}
