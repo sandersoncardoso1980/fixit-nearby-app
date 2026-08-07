@@ -25,7 +25,25 @@ export type Profile = {
   is_online: boolean;
   coverage_radius_km: number;
   portfolio: string[];
+  is_pro: boolean;
+  is_verified: boolean;
+  pro_expires_at: string | null;
+  profile_views: number;
+  contact_count: number;
   created_at: string;
+};
+
+export type ProRequestStatus = "pending" | "approved" | "rejected";
+
+export type ProRequest = {
+  id: string;
+  provider_id: string;
+  contact_phone: string | null;
+  message: string | null;
+  status: string;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Category = {
