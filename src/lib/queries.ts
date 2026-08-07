@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Category, Profile, Review, ServiceRequest } from "@/lib/types";
+import type { Category, Profile, ProRequest, Review, ServiceRequest } from "@/lib/types";
 
 export const categoriesQuery = queryOptions({
   queryKey: ["categories"],
@@ -104,3 +104,48 @@ export const openRequestsQuery = queryOptions({
     return (data ?? []) as ServiceRequest[];
   },
 });
+
+export const proProvidersQuery = queryOptions({
+  queryKey: ["pro-providers"],
+  queryFn: async (): Promise<Profile[]> => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("role", "provider")
+      .eq("is_pro", true)
+      .order("rating_avg", { ascending: false });
+    if (error) throw error;
+    const now = Date.now();
+    return ((data ?? []) as Profile[]).filter(
+      (p) => !p.pro_expires_at || new Date(p.pro_expires_at).getTime() > now,
+    );
+  },
+});
+
+export const proRequestsQuery = queryOptions({
+  queryKey: ["pro-requests"],
+  queryFn: async (): Promise<ProRequest[]> => {
+    const { data, error } = await supabase
+      .from("pro_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as ProRequest[];
+  },
+});
+
+export function myProRequestsQuery(profileId: string | undefined) {
+  return queryOptions({
+    queryKey: ["my-pro-requests", profileId],
+    enabled: !!profileId,
+    queryFn: async (): Promise<ProRequest[]> => {
+      const { data, error } = await supabase
+        .from("pro_requests")
+        .select("*")
+        .eq("provider_id", profileId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as ProRequest[];
+    },
+  });
+}
