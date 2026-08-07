@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Radio, MessageSquare, TrendingUp, Star, Briefcase } from "lucide-react";
+import { Radio, MessageSquare, TrendingUp, Star, Briefcase, Crown, Eye, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { categoriesQuery, openRequestsQuery, providerJobsQuery } from "@/lib/queries";
 import { brl } from "@/lib/geo";
+import { isProActive } from "@/lib/pro";
 import { STATUS_LABEL, type RequestStatus, type ServiceRequest } from "@/lib/types";
 
 export const Route = createFileRoute("/prestador")({
@@ -121,6 +122,37 @@ function PrestadorPanel() {
         <Stat label="Avaliação" value={(profile?.rating_avg ?? 0).toFixed(1)} icon={<Star className="size-3.5" />} />
         <Stat label="Ganhos" value={brl(earnings)} icon={<TrendingUp className="size-3.5" />} />
       </div>
+
+      {profile && isProActive(profile) ? (
+        <div className="mt-4 rounded-2xl border border-brand/40 bg-card p-4 shadow-soft">
+          <p className="flex items-center gap-2 text-sm font-semibold">
+            <Crown className="size-4 text-brand" /> Plano PRO ativo
+            {profile.pro_expires_at && (
+              <span className="font-normal text-muted-foreground">
+                · até {new Date(profile.pro_expires_at).toLocaleDateString("pt-BR")}
+              </span>
+            )}
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <Stat label="Visualizações" value={String(profile.profile_views)} icon={<Eye className="size-3.5" />} />
+            <Stat label="Contatos recebidos" value={String(profile.contact_count)} icon={<Phone className="size-3.5" />} />
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl bg-gradient-hero p-4 text-white shadow-soft">
+          <div className="min-w-0">
+            <p className="flex items-center gap-2 text-sm font-semibold">
+              <Crown className="size-4" /> Seja PRO por R$ 19,90/mês
+            </p>
+            <p className="text-xs text-white/85">
+              Destaque na tela inicial, selo verificado e prioridade nas buscas.
+            </p>
+          </div>
+          <Button asChild variant="secondary" size="sm">
+            <Link to="/pro">Assinar</Link>
+          </Button>
+        </div>
+      )}
 
       <section className="mt-10">
         <h2 className="text-lg font-bold">Chamados disponíveis</h2>
