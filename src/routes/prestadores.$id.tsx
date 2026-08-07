@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, BadgeCheck, Clock } from "lucide-react";
+import { BadgeCheck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StarRating } from "@/components/StarRating";
 import { RequestDialog } from "@/components/RequestDialog";
 import { categoriesQuery, providerCategoriesQuery, providerQuery, reviewsQuery } from "@/lib/queries";
-import { brl, distanceKm, formatKm, DEFAULT_CENTER } from "@/lib/geo";
+import { brl, CITY_LABEL } from "@/lib/geo";
 
 export const Route = createFileRoute("/prestadores/$id")({
   head: () => ({
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/prestadores/$id")({
       { title: "Perfil do profissional — ServiçoJá" },
       {
         name: "description",
-        content: "Veja portfólio, avaliações, preço por hora e distância antes de contratar.",
+        content: "Veja portfólio, avaliações, preço por hora e serviços antes de contratar.",
       },
       { property: "og:title", content: "Perfil do profissional — ServiçoJá" },
       { property: "og:description", content: "Portfólio, avaliações e preços do profissional." },
@@ -40,7 +40,6 @@ function ProviderProfile() {
   const cats = categories.filter((c) =>
     links.some((l) => l.provider_id === provider.id && l.category_id === c.id),
   );
-  const dist = distanceKm(DEFAULT_CENTER, { lat: provider.latitude, lng: provider.longitude });
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
@@ -61,9 +60,7 @@ function ProviderProfile() {
                 <StarRating value={provider.rating_avg} size={14} /> {provider.rating_avg.toFixed(1)} (
                 {provider.total_reviews})
               </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="size-3.5" /> {formatKm(dist)}
-              </span>
+              <span className="flex items-center gap-1">{CITY_LABEL}</span>
               <span className="flex items-center gap-1">
                 <Clock className="size-3.5" /> {provider.jobs_done} serviços
               </span>

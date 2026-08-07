@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { DEFAULT_CENTER } from "@/lib/geo";
 import type { Category, Profile } from "@/lib/types";
 
 export function RequestDialog({
@@ -67,8 +66,6 @@ export function RequestDialog({
       title: title.trim().slice(0, 120),
       description: description.trim().slice(0, 1000) || null,
       address: address.trim().slice(0, 200) || null,
-      lat: DEFAULT_CENTER.lat,
-      lng: DEFAULT_CENTER.lng,
       status: provider ? "pending" : "pending",
       agreed_price: price ? Number(price) : null,
     });

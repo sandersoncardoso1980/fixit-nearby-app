@@ -6,18 +6,16 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { StarRating } from "@/components/StarRating";
-import { brl, formatKm } from "@/lib/geo";
+import { brl } from "@/lib/geo";
 import type { Profile } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 
 export function CompareDialog({
   providers,
-  distances,
   open,
   onOpenChange,
 }: {
   providers: Profile[];
-  distances: Record<string, number>;
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
@@ -34,7 +32,6 @@ export function CompareDialog({
       ),
     },
     { label: "Preço/hora", render: (p) => <strong>{brl(p.hourly_rate)}</strong> },
-    { label: "Distância", render: (p) => formatKm(distances[p.id] ?? Infinity) },
     { label: "Serviços feitos", render: (p) => `${p.jobs_done}` },
     {
       label: "Disponibilidade",
@@ -45,7 +42,6 @@ export function CompareDialog({
           <Badge variant="secondary">Offline</Badge>
         ),
     },
-    { label: "Raio de atendimento", render: (p) => `${p.coverage_radius_km} km` },
   ];
 
   return (
@@ -53,7 +49,7 @@ export function CompareDialog({
       <DialogContent className="max-h-[90vh] overflow-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Comparar prestadores</DialogTitle>
-          <DialogDescription>Veja lado a lado valores, distância e reputação.</DialogDescription>
+          <DialogDescription>Veja lado a lado valores, reputação e disponibilidade.</DialogDescription>
         </DialogHeader>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[520px] border-separate border-spacing-y-2 text-sm">
