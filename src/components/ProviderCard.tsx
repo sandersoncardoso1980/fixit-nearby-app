@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, Briefcase, Crown } from "lucide-react";
+import { BadgeCheck, Briefcase, Crown, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,18 +11,21 @@ import { cn } from "@/lib/utils";
 
 export function ProviderCard({
   provider,
+  distance,
   categories,
   selected,
   onToggleCompare,
   onHire,
 }: {
   provider: Profile;
+  distance?: number;
   categories: Category[];
   selected: boolean;
   onToggleCompare: () => void;
   onHire: () => void;
 }) {
   const pro = isProActive(provider);
+  
   return (
     <article
       className={cn(
@@ -32,6 +35,7 @@ export function ProviderCard({
       )}
     >
       {pro && <span className="absolute inset-x-0 top-0 h-1 bg-gradient-hero" />}
+      
       <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3">
         <div className="relative shrink-0">
           <img
@@ -62,6 +66,13 @@ export function ProviderCard({
               <Briefcase className="size-3" />
               {provider.jobs_done} serviços
             </span>
+            {/* Exibe a distância se fornecida */}
+            {distance !== undefined && distance > 0 && (
+              <span className="flex items-center gap-1">
+                <MapPin className="size-3" />
+                {distance.toFixed(1)} km
+              </span>
+            )}
           </div>
         </div>
         <label className="flex shrink-0 cursor-pointer flex-col items-center gap-1 text-[10px] text-muted-foreground">
