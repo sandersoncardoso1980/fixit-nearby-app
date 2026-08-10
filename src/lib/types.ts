@@ -33,6 +33,23 @@ export type Profile = {
   created_at: string;
 };
 
+export type Ad = {
+  id: string;
+  advertiser_name: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  link_url: string | null;
+  phone: string | null;
+  amount_paid: number;
+  sort_order: number;
+  is_active: boolean;
+  starts_at: string;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ProRequestStatus = "pending" | "approved" | "rejected";
 
 export type ProRequest = {

@@ -12,7 +12,7 @@ import { ProBanner } from "@/components/ProBanner";
 import { CompareDialog } from "@/components/CompareDialog";
 import { PriceCalculator } from "@/components/PriceCalculator";
 import { RequestDialog } from "@/components/RequestDialog";
-import { categoriesQuery, proProvidersQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
+import { activeAdsQuery, categoriesQuery, proProvidersQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
 import { isProActive } from "@/lib/pro";
 import { supabase } from "@/integrations/supabase/client";
 import { CITY_LABEL, CITY_NAME } from "@/lib/geo";
@@ -49,10 +49,10 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "online", label: "Disponível agora" },
 ];
 
-// Dados de exemplo para o carrossel - substitua pelos seus anúncios reais
+// Slides de fallback quando ainda não há anunciantes cadastrados
 const CAROUSEL_ITEMS = [
   {
-    id: 1,
+    id: "fallback-1",
     title: "Promoção Especial!",
     description: "Contrate um profissional PRO e ganhe 10% de desconto na primeira hora",
     image: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=400&fit=crop",
@@ -61,25 +61,16 @@ const CAROUSEL_ITEMS = [
     color: "from-blue-600 to-purple-600",
   },
   {
-    id: 2,
+    id: "fallback-2",
     title: "Profissionais Verificados",
     description: "Todos os profissionais passam por verificação de identidade e qualidade",
     image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=400&fit=crop",
     cta: "Saiba mais",
-    link: "/about",
+    link: "/pro",
     color: "from-green-600 to-teal-600",
   },
   {
-    id: 3,
-    title: "Atendimento 24h",
-    description: "Serviços de emergência disponíveis a qualquer hora do dia ou noite",
-    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=400&fit=crop",
-    cta: "Chamar agora",
-    link: "/emergency",
-    color: "from-orange-600 to-red-600",
-  },
-  {
-    id: 4,
+    id: "fallback-3",
     title: "Plano PRO para Profissionais",
     description: "Destaque-se na plataforma e receba mais clientes. A partir de R$ 19,90/mês",
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop",
@@ -89,11 +80,34 @@ const CAROUSEL_ITEMS = [
   },
 ];
 
+const AD_COLORS = [
+  "from-blue-600 to-purple-600",
+  "from-green-600 to-teal-600",
+  "from-orange-600 to-red-600",
+  "from-purple-600 to-pink-600",
+];
+
 function Home() {
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: providers = [], isLoading } = useQuery(providersQuery);
   const { data: links = [] } = useQuery(providerCategoriesQuery);
   const { data: proProviders = [] } = useQuery(proProvidersQuery);
+  const { data: ads = [] } = useQuery(activeAdsQuery);
+
+  const slides = useMemo(() => {
+    if (!ads.length) return CAROUSEL_ITEMS;
+    return ads.map((a, i) => ({
+      id: a.id,
+      title: a.title,
+      description: a.description ?? "",
+      image:
+        a.image_url ||
+        "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=400&fit=crop",
+      cta: a.link_url ? "Saiba mais" : a.advertiser_name,
+      link: a.link_url ?? "#",
+      color: AD_COLORS[i % AD_COLORS.length]!,
+    }));
+  }, [ads]);
 
   const [search, setSearch] = useState("");
   const city = CITY_LABEL;
@@ -119,11 +133,15 @@ function Home() {
     if (!isAutoPlaying) return;
     
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % CAROUSEL_ITEMS.length);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, slides.length]);
+
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [slides.length]);
 
   // Pausar auto-play quando o usuário interage
   const handleUserInteraction = () => {
@@ -138,12 +156,12 @@ function Home() {
   };
 
   const goToPrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + CAROUSEL_ITEMS.length) % CAROUSEL_ITEMS.length);
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
     handleUserInteraction();
   };
 
   const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % CAROUSEL_ITEMS.length);
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
     handleUserInteraction();
   };
 
@@ -291,7 +309,7 @@ function Home() {
             className="flex transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
-            {CAROUSEL_ITEMS.map((item) => (
+            {slides.map((item) => (
               <div
                 key={item.id}
                 className="min-w-full relative h-[180px] sm:h-[240px] md:h-[300px]"
@@ -329,7 +347,7 @@ function Home() {
           </div>
 
           <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2">
-            {CAROUSEL_ITEMS.map((_, index) => (
+            {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
