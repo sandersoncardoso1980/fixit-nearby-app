@@ -21,7 +21,7 @@ export const Route = createFileRoute("/pro")({
       {
         name: "description",
         content:
-          "Por R$ 19,90/mês tenha perfil destacado, selo de verificado, portfólio ampliado, estatísticas e prioridade nas buscas do ServiçoJá.",
+          "Por R$ 49,90/mês tenha perfil destacado, selo de verificado, portfólio ampliado, estatísticas e prioridade nas buscas do ServiçoJá.",
       },
       { property: "og:title", content: "Plano PRO — destaque seu perfil | ServiçoJá" },
       {
