@@ -26,7 +26,7 @@ export const Route = createFileRoute("/pro")({
       { property: "og:title", content: "Plano PRO — destaque seu perfil | ServiçoJá" },
       {
         property: "og:description",
-        content: "Destaque na tela inicial, selo verificado e prioridade nas buscas por R$ 19,90/mês.",
+        content: "Destaque na tela inicial, selo verificado e prioridade nas buscas por R$ 49,90/mês.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -189,7 +189,7 @@ function ProPage() {
                     maxLength={400}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Ex.: Pix feito às 10h no valor de R$ 19,90."
+                    placeholder="Ex.: Pix feito às 10h no valor de R$ 49,90."
                   />
                 </div>
                 <Button variant="brand" className="w-full" disabled={busy} onClick={() => void submit()}>
