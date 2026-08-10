@@ -83,6 +83,57 @@ const EMPTY: FormState = {
   categoryIds: [],
 };
 
+type AdFormState = {
+  advertiser_name: string;
+  title: string;
+  description: string;
+  image_url: string;
+  link_url: string;
+  phone: string;
+  amount_paid: string;
+  sort_order: string;
+  is_active: boolean;
+  expires_at: string;
+};
+
+const EMPTY_AD: AdFormState = {
+  advertiser_name: "",
+  title: "",
+  description: "",
+  image_url: "",
+  link_url: "",
+  phone: "",
+  amount_paid: "",
+  sort_order: "0",
+  is_active: true,
+  expires_at: "",
+};
+
+type CatFormState = {
+  name: string;
+  slug: string;
+  icon_name: string;
+  description: string;
+  base_estimated_price: string;
+};
+
+const EMPTY_CAT: CatFormState = {
+  name: "",
+  slug: "",
+  icon_name: "Wrench",
+  description: "",
+  base_estimated_price: "100",
+};
+
+function slugify(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function AdminPage() {
   const { isAdmin, loading, userId } = useAuth();
   const qc = useQueryClient();
