@@ -139,6 +139,10 @@ function Home() {
     return () => clearInterval(interval);
   }, [isAutoPlaying, slides.length]);
 
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [slides.length]);
+
   // Pausar auto-play quando o usuário interage
   const handleUserInteraction = () => {
     setIsAutoPlaying(false);
