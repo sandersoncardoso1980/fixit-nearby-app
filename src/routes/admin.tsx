@@ -30,10 +30,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { categoriesQuery, proRequestsQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
+import {
+  allAdsQuery,
+  categoriesQuery,
+  proRequestsQuery,
+  providerCategoriesQuery,
+  providersQuery,
+} from "@/lib/queries";
 import { isProActive } from "@/lib/pro";
 import { brl, CITY_NAME } from "@/lib/geo";
-import type { Profile } from "@/lib/types";
+import type { Ad, Category, Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
