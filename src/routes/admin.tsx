@@ -90,6 +90,7 @@ function AdminPage() {
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: links = [] } = useQuery(providerCategoriesQuery);
   const { data: proRequests = [] } = useQuery(proRequestsQuery);
+  const { data: ads = [] } = useQuery(allAdsQuery);
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Profile | null>(null);
@@ -97,6 +98,142 @@ function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [toDelete, setToDelete] = useState<Profile | null>(null);
   const [search, setSearch] = useState("");
+
+  // Anunciantes pagos (carrossel da home)
+  const [adOpen, setAdOpen] = useState(false);
+  const [adEditing, setAdEditing] = useState<Ad | null>(null);
+  const [adForm, setAdForm] = useState<AdFormState>(EMPTY_AD);
+  const [adSaving, setAdSaving] = useState(false);
+  const [adToDelete, setAdToDelete] = useState<Ad | null>(null);
+
+  // Profissões (categorias)
+  const [catOpen, setCatOpen] = useState(false);
+  const [catEditing, setCatEditing] = useState<Category | null>(null);
+  const [catForm, setCatForm] = useState<CatFormState>(EMPTY_CAT);
+  const [catSaving, setCatSaving] = useState(false);
+  const [catToDelete, setCatToDelete] = useState<Category | null>(null);
+
+  useEffect(() => {
+    if (!adOpen) return;
+    setAdForm(
+      adEditing
+        ? {
+            advertiser_name: adEditing.advertiser_name,
+            title: adEditing.title,
+            description: adEditing.description ?? "",
+            image_url: adEditing.image_url ?? "",
+            link_url: adEditing.link_url ?? "",
+            phone: adEditing.phone ?? "",
+            amount_paid: String(adEditing.amount_paid ?? ""),
+            sort_order: String(adEditing.sort_order ?? 0),
+            is_active: adEditing.is_active,
+            expires_at: adEditing.expires_at ? adEditing.expires_at.slice(0, 10) : "",
+          }
+        : EMPTY_AD,
+    );
+  }, [adOpen, adEditing]);
+
+  useEffect(() => {
+    if (!catOpen) return;
+    setCatForm(
+      catEditing
+        ? {
+            name: catEditing.name,
+            slug: catEditing.slug,
+            icon_name: catEditing.icon_name,
+            description: catEditing.description ?? "",
+            base_estimated_price: String(catEditing.base_estimated_price ?? ""),
+          }
+        : EMPTY_CAT,
+    );
+  }, [catOpen, catEditing]);
+
+  async function saveAd() {
+    if (!adForm.advertiser_name.trim() || !adForm.title.trim()) {
+      toast.error("Informe o anunciante e o título do anúncio.");
+      return;
+    }
+    setAdSaving(true);
+    try {
+      const payload = {
+        advertiser_name: adForm.advertiser_name.trim(),
+        title: adForm.title.trim(),
+        description: adForm.description.trim() || null,
+        image_url: adForm.image_url.trim() || null,
+        link_url: adForm.link_url.trim() || null,
+        phone: adForm.phone.trim() || null,
+        amount_paid: adForm.amount_paid ? Number(adForm.amount_paid) : 0,
+        sort_order: adForm.sort_order ? Number(adForm.sort_order) : 0,
+        is_active: adForm.is_active,
+        expires_at: adForm.expires_at ? new Date(`${adForm.expires_at}T23:59:59`).toISOString() : null,
+      };
+      const { error } = adEditing
+        ? await supabase.from("ads").update(payload).eq("id", adEditing.id)
+        : await supabase.from("ads").insert(payload);
+      if (error) throw error;
+      toast.success(adEditing ? "Anúncio atualizado." : "Anúncio criado.");
+      void qc.invalidateQueries({ queryKey: ["ads"] });
+      setAdOpen(false);
+      setAdEditing(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível salvar o anúncio.");
+    } finally {
+      setAdSaving(false);
+    }
+  }
+
+  async function deleteAd() {
+    if (!adToDelete) return;
+    const { error } = await supabase.from("ads").delete().eq("id", adToDelete.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Anúncio removido.");
+      void qc.invalidateQueries({ queryKey: ["ads"] });
+    }
+    setAdToDelete(null);
+  }
+
+  async function saveCategory() {
+    if (!catForm.name.trim()) {
+      toast.error("Informe o nome da profissão.");
+      return;
+    }
+    setCatSaving(true);
+    try {
+      const payload = {
+        name: catForm.name.trim(),
+        slug: (catForm.slug.trim() || slugify(catForm.name)).slice(0, 60),
+        icon_name: catForm.icon_name.trim() || "Wrench",
+        description: catForm.description.trim() || null,
+        base_estimated_price: catForm.base_estimated_price ? Number(catForm.base_estimated_price) : 100,
+      };
+      const { error } = catEditing
+        ? await supabase.from("categories").update(payload).eq("id", catEditing.id)
+        : await supabase.from("categories").insert(payload);
+      if (error) throw error;
+      toast.success(catEditing ? "Profissão atualizada." : "Profissão criada.");
+      void qc.invalidateQueries({ queryKey: ["categories"] });
+      setCatOpen(false);
+      setCatEditing(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível salvar a profissão.");
+    } finally {
+      setCatSaving(false);
+    }
+  }
+
+  async function deleteCategory() {
+    if (!catToDelete) return;
+    const { error } = await supabase.from("categories").delete().eq("id", catToDelete.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Profissão removida.");
+      void qc.invalidateQueries({ queryKey: ["categories"] });
+      void qc.invalidateQueries({ queryKey: ["provider-categories"] });
+    }
+    setCatToDelete(null);
+  }
+
 
   const catsByProvider = useMemo(() => {
     const map: Record<string, string[]> = {};
