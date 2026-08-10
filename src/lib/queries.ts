@@ -1,6 +1,36 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Category, Profile, ProRequest, Review, ServiceRequest } from "@/lib/types";
+import type { Ad, Category, Profile, ProRequest, Review, ServiceRequest } from "@/lib/types";
+
+export const activeAdsQuery = queryOptions({
+  queryKey: ["ads", "active"],
+  queryFn: async (): Promise<Ad[]> => {
+    const nowIso = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("ads")
+      .select("*")
+      .eq("is_active", true)
+      .lte("starts_at", nowIso)
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+      .order("sort_order")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as Ad[];
+  },
+});
+
+export const allAdsQuery = queryOptions({
+  queryKey: ["ads", "all"],
+  queryFn: async (): Promise<Ad[]> => {
+    const { data, error } = await supabase
+      .from("ads")
+      .select("*")
+      .order("sort_order")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as Ad[];
+  },
+});
 
 export const categoriesQuery = queryOptions({
   queryKey: ["categories"],
