@@ -133,11 +133,11 @@ function Home() {
     if (!isAutoPlaying) return;
     
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % CAROUSEL_ITEMS.length);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, slides.length]);
 
   // Pausar auto-play quando o usuário interage
   const handleUserInteraction = () => {
@@ -152,12 +152,12 @@ function Home() {
   };
 
   const goToPrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + CAROUSEL_ITEMS.length) % CAROUSEL_ITEMS.length);
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
     handleUserInteraction();
   };
 
   const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % CAROUSEL_ITEMS.length);
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
     handleUserInteraction();
   };
 
@@ -305,7 +305,7 @@ function Home() {
             className="flex transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
-            {CAROUSEL_ITEMS.map((item) => (
+            {slides.map((item) => (
               <div
                 key={item.id}
                 className="min-w-full relative h-[180px] sm:h-[240px] md:h-[300px]"
@@ -343,7 +343,7 @@ function Home() {
           </div>
 
           <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2">
-            {CAROUSEL_ITEMS.map((_, index) => (
+            {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
