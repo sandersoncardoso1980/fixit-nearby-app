@@ -12,7 +12,7 @@ import { ProBanner } from "@/components/ProBanner";
 import { CompareDialog } from "@/components/CompareDialog";
 import { PriceCalculator } from "@/components/PriceCalculator";
 import { RequestDialog } from "@/components/RequestDialog";
-import { categoriesQuery, proProvidersQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
+import { activeAdsQuery, categoriesQuery, proProvidersQuery, providerCategoriesQuery, providersQuery } from "@/lib/queries";
 import { isProActive } from "@/lib/pro";
 import { supabase } from "@/integrations/supabase/client";
 import { CITY_LABEL, CITY_NAME } from "@/lib/geo";
