@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      ads: {
+        Row: {
+          advertiser_name: string
+          amount_paid: number
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          link_url: string | null
+          phone: string | null
+          sort_order: number
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          advertiser_name: string
+          amount_paid?: number
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_url?: string | null
+          phone?: string | null
+          sort_order?: number
+          starts_at?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          advertiser_name?: string
+          amount_paid?: number
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_url?: string | null
+          phone?: string | null
+          sort_order?: number
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           base_estimated_price: number
