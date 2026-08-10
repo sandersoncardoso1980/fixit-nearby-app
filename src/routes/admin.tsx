@@ -594,6 +594,350 @@ function AdminPage() {
         </div>
       </section>
 
+      <section className="mt-10">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="flex items-center gap-2 text-lg font-bold">
+              <Megaphone className="size-5 text-primary" /> Anunciantes pagos
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Anúncios exibidos no carrossel da página inicial.
+            </p>
+          </div>
+          <Button
+            variant="brand"
+            onClick={() => {
+              setAdEditing(null);
+              setAdOpen(true);
+            }}
+          >
+            <Plus /> Novo anúncio
+          </Button>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {ads.length === 0 && (
+            <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+              Nenhum anunciante cadastrado.
+            </p>
+          )}
+          {ads.map((a) => (
+            <div
+              key={a.id}
+              className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft"
+            >
+              {a.image_url ? (
+                <img src={a.image_url} alt="" className="h-12 w-20 rounded-xl object-cover" />
+              ) : (
+                <span className="grid h-12 w-20 place-items-center rounded-xl bg-accent text-primary">
+                  <Megaphone className="size-5" />
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{a.title}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {a.advertiser_name} · {brl(a.amount_paid)} · ordem {a.sort_order}
+                  {a.expires_at ? ` · até ${new Date(a.expires_at).toLocaleDateString("pt-BR")}` : ""}
+                </p>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <Badge variant={a.is_active ? "default" : "secondary"} className="text-[10px]">
+                    {a.is_active ? "Ativo" : "Inativo"}
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Editar anúncio ${a.title}`}
+                  onClick={() => {
+                    setAdEditing(a);
+                    setAdOpen(true);
+                  }}
+                >
+                  <Pencil />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Excluir anúncio ${a.title}`}
+                  onClick={() => setAdToDelete(a)}
+                >
+                  <Trash2 className="text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="flex items-center gap-2 text-lg font-bold">
+              <Briefcase className="size-5 text-primary" /> Profissões
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Categorias disponíveis para busca e cadastro de profissionais.
+            </p>
+          </div>
+          <Button
+            variant="brand"
+            onClick={() => {
+              setCatEditing(null);
+              setCatOpen(true);
+            }}
+          >
+            <Plus /> Nova profissão
+          </Button>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {categories.map((c) => (
+            <div
+              key={c.id}
+              className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-4 shadow-soft"
+            >
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{c.name}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {c.slug} · a partir de {brl(c.base_estimated_price)}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Editar ${c.name}`}
+                  onClick={() => {
+                    setCatEditing(c);
+                    setCatOpen(true);
+                  }}
+                >
+                  <Pencil />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Excluir ${c.name}`}
+                  onClick={() => setCatToDelete(c)}
+                >
+                  <Trash2 className="text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Dialog open={adOpen} onOpenChange={setAdOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{adEditing ? "Editar anúncio" : "Novo anúncio"}</DialogTitle>
+            <DialogDescription>Aparece no carrossel da página inicial.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="ad-adv">Anunciante</Label>
+              <Input
+                id="ad-adv"
+                value={adForm.advertiser_name}
+                onChange={(e) => setAdForm((f) => ({ ...f, advertiser_name: e.target.value }))}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="ad-title">Título</Label>
+              <Input
+                id="ad-title"
+                value={adForm.title}
+                onChange={(e) => setAdForm((f) => ({ ...f, title: e.target.value }))}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="ad-desc">Descrição</Label>
+              <Textarea
+                id="ad-desc"
+                rows={3}
+                value={adForm.description}
+                onChange={(e) => setAdForm((f) => ({ ...f, description: e.target.value }))}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="ad-img">Imagem (URL)</Label>
+              <Input
+                id="ad-img"
+                value={adForm.image_url}
+                onChange={(e) => setAdForm((f) => ({ ...f, image_url: e.target.value }))}
+              />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-1.5">
+                <Label htmlFor="ad-link">Link do anúncio</Label>
+                <Input
+                  id="ad-link"
+                  value={adForm.link_url}
+                  onChange={(e) => setAdForm((f) => ({ ...f, link_url: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="ad-phone">WhatsApp / telefone</Label>
+                <Input
+                  id="ad-phone"
+                  value={adForm.phone}
+                  onChange={(e) => setAdForm((f) => ({ ...f, phone: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-1.5">
+                <Label htmlFor="ad-paid">Valor pago (R$)</Label>
+                <Input
+                  id="ad-paid"
+                  type="number"
+                  min={0}
+                  value={adForm.amount_paid}
+                  onChange={(e) => setAdForm((f) => ({ ...f, amount_paid: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="ad-order">Ordem</Label>
+                <Input
+                  id="ad-order"
+                  type="number"
+                  value={adForm.sort_order}
+                  onChange={(e) => setAdForm((f) => ({ ...f, sort_order: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="ad-exp">Expira em</Label>
+                <Input
+                  id="ad-exp"
+                  type="date"
+                  value={adForm.expires_at}
+                  onChange={(e) => setAdForm((f) => ({ ...f, expires_at: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between rounded-xl border p-3">
+              <Label htmlFor="ad-active" className="cursor-pointer">
+                Anúncio ativo
+              </Label>
+              <Switch
+                id="ad-active"
+                checked={adForm.is_active}
+                onCheckedChange={(v) => setAdForm((f) => ({ ...f, is_active: v }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAdOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="brand" onClick={() => void saveAd()} disabled={adSaving}>
+              {adSaving ? "Salvando…" : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={catOpen} onOpenChange={setCatOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{catEditing ? "Editar profissão" : "Nova profissão"}</DialogTitle>
+            <DialogDescription>
+              O ícone usa nomes do Lucide (ex.: Wrench, Hammer, PaintRoller).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="cat-name">Nome da profissão</Label>
+              <Input
+                id="cat-name"
+                value={catForm.name}
+                onChange={(e) => setCatForm((f) => ({ ...f, name: e.target.value }))}
+              />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-1.5">
+                <Label htmlFor="cat-slug">Identificador (slug)</Label>
+                <Input
+                  id="cat-slug"
+                  placeholder={slugify(catForm.name) || "pedreiro"}
+                  value={catForm.slug}
+                  onChange={(e) => setCatForm((f) => ({ ...f, slug: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="cat-icon">Ícone</Label>
+                <Input
+                  id="cat-icon"
+                  value={catForm.icon_name}
+                  onChange={(e) => setCatForm((f) => ({ ...f, icon_name: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="cat-price">Preço estimado base (R$)</Label>
+              <Input
+                id="cat-price"
+                type="number"
+                min={0}
+                value={catForm.base_estimated_price}
+                onChange={(e) => setCatForm((f) => ({ ...f, base_estimated_price: e.target.value }))}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="cat-desc">Descrição</Label>
+              <Textarea
+                id="cat-desc"
+                rows={3}
+                value={catForm.description}
+                onChange={(e) => setCatForm((f) => ({ ...f, description: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCatOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="brand" onClick={() => void saveCategory()} disabled={catSaving}>
+              {catSaving ? "Salvando…" : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!adToDelete} onOpenChange={(o) => !o && setAdToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir anúncio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {adToDelete?.title} deixará de aparecer no carrossel.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void deleteAd()}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!catToDelete} onOpenChange={(o) => !o && setCatToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir profissão?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {catToDelete?.name} será removida da lista de categorias.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void deleteCategory()}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
