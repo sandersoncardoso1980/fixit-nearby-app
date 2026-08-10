@@ -49,10 +49,10 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "online", label: "Disponível agora" },
 ];
 
-// Dados de exemplo para o carrossel - substitua pelos seus anúncios reais
+// Slides de fallback quando ainda não há anunciantes cadastrados
 const CAROUSEL_ITEMS = [
   {
-    id: 1,
+    id: "fallback-1",
     title: "Promoção Especial!",
     description: "Contrate um profissional PRO e ganhe 10% de desconto na primeira hora",
     image: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=400&fit=crop",
@@ -61,25 +61,16 @@ const CAROUSEL_ITEMS = [
     color: "from-blue-600 to-purple-600",
   },
   {
-    id: 2,
+    id: "fallback-2",
     title: "Profissionais Verificados",
     description: "Todos os profissionais passam por verificação de identidade e qualidade",
     image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=400&fit=crop",
     cta: "Saiba mais",
-    link: "/about",
+    link: "/pro",
     color: "from-green-600 to-teal-600",
   },
   {
-    id: 3,
-    title: "Atendimento 24h",
-    description: "Serviços de emergência disponíveis a qualquer hora do dia ou noite",
-    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=400&fit=crop",
-    cta: "Chamar agora",
-    link: "/emergency",
-    color: "from-orange-600 to-red-600",
-  },
-  {
-    id: 4,
+    id: "fallback-3",
     title: "Plano PRO para Profissionais",
     description: "Destaque-se na plataforma e receba mais clientes. A partir de R$ 19,90/mês",
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop",
@@ -89,11 +80,34 @@ const CAROUSEL_ITEMS = [
   },
 ];
 
+const AD_COLORS = [
+  "from-blue-600 to-purple-600",
+  "from-green-600 to-teal-600",
+  "from-orange-600 to-red-600",
+  "from-purple-600 to-pink-600",
+];
+
 function Home() {
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: providers = [], isLoading } = useQuery(providersQuery);
   const { data: links = [] } = useQuery(providerCategoriesQuery);
   const { data: proProviders = [] } = useQuery(proProvidersQuery);
+  const { data: ads = [] } = useQuery(activeAdsQuery);
+
+  const slides = useMemo(() => {
+    if (!ads.length) return CAROUSEL_ITEMS;
+    return ads.map((a, i) => ({
+      id: a.id,
+      title: a.title,
+      description: a.description ?? "",
+      image:
+        a.image_url ||
+        "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=400&fit=crop",
+      cta: a.link_url ? "Saiba mais" : a.advertiser_name,
+      link: a.link_url ?? "#",
+      color: AD_COLORS[i % AD_COLORS.length]!,
+    }));
+  }, [ads]);
 
   const [search, setSearch] = useState("");
   const city = CITY_LABEL;
