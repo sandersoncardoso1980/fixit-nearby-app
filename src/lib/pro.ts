@@ -1,5 +1,5 @@
 export const PRO_PRICE = 19.9;
-export const PRO_PRICE_LABEL = "R$ 19,90/mês";
+export const PRO_PRICE_LABEL = "R$ 49,90/mês";
 
 /** Dados de pagamento do plano PRO (pagamento direto ao administrador). */
 export const PRO_PAYMENT = {
