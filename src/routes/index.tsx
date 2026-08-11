@@ -353,7 +353,7 @@ function Home() {
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
-                    <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-85`} />
+                    <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-25`} />
                   </div>
 
                   <div className="absolute inset-0 flex items-center p-4 sm:p-6 md:p-10">
