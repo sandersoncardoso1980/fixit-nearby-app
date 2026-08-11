@@ -94,6 +94,7 @@ type AdFormState = {
   sort_order: string;
   is_active: boolean;
   expires_at: string;
+  category_id: string;
 };
 
 const EMPTY_AD: AdFormState = {
@@ -107,6 +108,7 @@ const EMPTY_AD: AdFormState = {
   sort_order: "0",
   is_active: true,
   expires_at: "",
+  category_id: "",
 };
 
 type CatFormState = {
