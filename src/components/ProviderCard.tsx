@@ -40,7 +40,7 @@ export function ProviderCard({
         <div className="relative shrink-0">
           <img
             src={provider.avatar_url ?? ""}
-            alt={`Foto de ${provider.full_name}`}
+            alt={`${provider.full_name}, profissional de serviços em Entre Rios de Minas`}
             loading="lazy"
             className="size-14 rounded-xl object-cover"
           />
