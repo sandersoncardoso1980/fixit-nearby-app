@@ -24,6 +24,7 @@ import { CompareDialog } from "@/components/CompareDialog";
 import { PriceCalculator } from "@/components/PriceCalculator";
 import { RequestDialog } from "@/components/RequestDialog";
 import {
+  activeAdsQuery,
   categoriesQuery,
   proProvidersQuery,
   providerCategoriesQuery,
@@ -64,9 +65,10 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "online", label: "Disponível agora" },
 ];
 
+// Slides de fallback quando ainda não há anunciantes cadastrados no BD
 const CAROUSEL_ITEMS = [
   {
-    id: 1,
+    id: "fallback-1",
     title: "Promoção Especial!",
     description: "Contrate um profissional PRO e ganhe 10% de desconto na primeira hora",
     image: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=400&fit=crop",
@@ -75,25 +77,16 @@ const CAROUSEL_ITEMS = [
     color: "from-blue-600 to-purple-600",
   },
   {
-    id: 2,
+    id: "fallback-2",
     title: "Profissionais Verificados",
     description: "Todos os profissionais passam por verificação de identidade e qualidade",
     image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=400&fit=crop",
     cta: "Saiba mais",
-    link: "/about",
+    link: "/pro",
     color: "from-green-600 to-teal-600",
   },
   {
-    id: 3,
-    title: "Atendimento 24h",
-    description: "Serviços de emergência disponíveis a qualquer hora do dia ou noite",
-    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=400&fit=crop",
-    cta: "Chamar agora",
-    link: "/emergency",
-    color: "from-orange-600 to-red-600",
-  },
-  {
-    id: 4,
+    id: "fallback-3",
     title: "Plano PRO para Profissionais",
     description: "Destaque-se na plataforma e receba mais clientes. A partir de R$ 19,90/mês",
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop",
@@ -103,11 +96,19 @@ const CAROUSEL_ITEMS = [
   },
 ];
 
+const AD_COLORS = [
+  "from-blue-600 to-purple-600",
+  "from-green-600 to-teal-600",
+  "from-orange-600 to-red-600",
+  "from-purple-600 to-pink-600",
+];
+
 function Home() {
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: providers = [], isLoading } = useQuery(providersQuery);
   const { data: links = [] } = useQuery(providerCategoriesQuery);
   const { data: proProviders = [] } = useQuery(proProvidersQuery);
+  const { data: ads = [] } = useQuery(activeAdsQuery);
 
   const [search, setSearch] = useState("");
   const city = CITY_LABEL;
@@ -117,6 +118,28 @@ function Home() {
   const [compareOpen, setCompareOpen] = useState(false);
   const [hireTarget, setHireTarget] = useState<Profile | null>(null);
   const [requestOpen, setRequestOpen] = useState(false);
+
+  // Anúncios filtrados pela profissão/categoria selecionada
+  const filteredAds = useMemo(
+    () => ads.filter((a) => !categoryId || !a.category_id || a.category_id === categoryId),
+    [ads, categoryId]
+  );
+
+  // Monta os slides unindo o Banco de Dados com fallback
+  const slides = useMemo(() => {
+    if (!filteredAds.length) return CAROUSEL_ITEMS;
+    return filteredAds.map((a, i) => ({
+      id: a.id,
+      title: a.title,
+      description: a.description ?? "",
+      image:
+        a.image_url ||
+        "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=400&fit=crop",
+      cta: a.link_url ? "Saiba mais" : a.advertiser_name ?? "Ver mais",
+      link: a.link_url ?? "#",
+      color: AD_COLORS[i % AD_COLORS.length]!,
+    }));
+  }, [filteredAds]);
 
   // Estado e refs do carrossel principal
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -129,25 +152,32 @@ function Home() {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
+  // Reseta o slide atual caso a lista de slides diminua de tamanho
+  useEffect(() => {
+    if (currentSlide >= slides.length) {
+      setCurrentSlide(0);
+    }
+  }, [slides.length, currentSlide]);
+
   // Auto-play do carrossel principal
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || slides.length === 0) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % CAROUSEL_ITEMS.length);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, slides.length]);
 
-  // Limpeza de timers no unmount
+  // Limpeza de timers ao desmontar o componente
   useEffect(() => {
     return () => {
       if (interactionTimeoutRef.current) clearTimeout(interactionTimeoutRef.current);
     };
   }, []);
 
-  // Pausar auto-play com segurança
+  // Pausa o auto-play temporariamente durante a interação do usuário
   const handleUserInteraction = useCallback(() => {
     setIsAutoPlaying(false);
     if (interactionTimeoutRef.current) {
@@ -164,16 +194,16 @@ function Home() {
   };
 
   const goToPrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + CAROUSEL_ITEMS.length) % CAROUSEL_ITEMS.length);
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
     handleUserInteraction();
   };
 
   const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % CAROUSEL_ITEMS.length);
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
     handleUserInteraction();
   };
 
-  // Funções de verificação e rolagem das categorias
+  // Funções de verificação e rolagem horizontal de categorias
   const checkArrowsVisibility = useCallback(() => {
     if (categoriesScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = categoriesScrollRef.current;
@@ -304,49 +334,64 @@ function Home() {
         </div>
       </section>
 
-      {/* CARROSSEL DE ANÚNCIOS */}
+      {/* CARROSSEL DE ANÚNCIOS - IMAGENS DINÂMICAS DO BANCO DE DADOS */}
       <section className="mx-auto max-w-6xl px-3 sm:px-4 -mt-1 sm:-mt-2 relative z-10">
         <div ref={carouselRef} className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg">
           <div
             className="flex transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
-            {CAROUSEL_ITEMS.map((item) => (
-              <div key={item.id} className="min-w-full relative h-[180px] sm:h-[240px] md:h-[300px]">
-                <div className="absolute inset-0">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-85`} />
-                </div>
+            {slides.map((item) => {
+              const isExternal = item.link.startsWith("http") || item.link.startsWith("#");
 
-                <div className="absolute inset-0 flex items-center p-4 sm:p-6 md:p-10">
-                  <div className="max-w-md sm:max-w-lg text-white">
-                    <h2 className="text-lg sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">
-                      {item.title}
-                    </h2>
-                    <p className="text-xs sm:text-sm md:text-base text-white/90 mb-3 sm:mb-4">
-                      {item.description}
-                    </p>
-                    <Link to={item.link}>
-                      <Button
-                        size="sm"
-                        className="text-xs sm:text-sm bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/30"
-                      >
-                        {item.cta} →
-                      </Button>
-                    </Link>
+              return (
+                <div key={item.id} className="min-w-full relative h-[180px] sm:h-[240px] md:h-[300px]">
+                  <div className="absolute inset-0">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-85`} />
+                  </div>
+
+                  <div className="absolute inset-0 flex items-center p-4 sm:p-6 md:p-10">
+                    <div className="max-w-md sm:max-w-lg text-white">
+                      <h2 className="text-lg sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">
+                        {item.title}
+                      </h2>
+                      <p className="text-xs sm:text-sm md:text-base text-white/90 mb-3 sm:mb-4">
+                        {item.description}
+                      </p>
+                      {isExternal ? (
+                        <a href={item.link} target={item.link.startsWith("http") ? "_blank" : "_self"} rel="noreferrer">
+                          <Button
+                            size="sm"
+                            className="text-xs sm:text-sm bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/30"
+                          >
+                            {item.cta} →
+                          </Button>
+                        </a>
+                      ) : (
+                        <Link to={item.link}>
+                          <Button
+                            size="sm"
+                            className="text-xs sm:text-sm bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/30"
+                          >
+                            {item.cta} →
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2">
-            {CAROUSEL_ITEMS.map((_, index) => (
+            {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
@@ -377,7 +422,11 @@ function Home() {
       </section>
 
       <ProBanner
-        providers={proProviders}
+        providers={
+          !categoryId
+            ? proProviders
+            : proProviders.filter((p) => (catsByProvider[p.id] ?? []).includes(categoryId))
+        }
         categories={categories}
         links={links}
         onHire={(p) => startHire(p)}
@@ -453,6 +502,16 @@ function Home() {
               <p className="text-sm font-semibold">
                 Prestadores em {CITY_NAME} ({filtered.length})
               </p>
+              {categoryId && (
+                <button
+                  type="button"
+                  onClick={() => setCategoryId(null)}
+                  className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium hover:bg-accent/70"
+                >
+                  {categories.find((c) => c.id === categoryId)?.name}
+                  <X className="size-3" />
+                </button>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:pb-0">
