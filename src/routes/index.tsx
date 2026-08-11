@@ -64,7 +64,7 @@ const CAROUSEL_ITEMS = [
     id: "fallback-2",
     title: "Profissionais Verificados",
     description: "Todos os profissionais passam por verificação de identidade e qualidade",
-    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=400&fit=crop",
+    image: "https://images.unsplash.com/photo-1521791136064-7986c0212926?w=800&h=400&fit=crop",
     cta: "Saiba mais",
     link: "/pro",
     color: "from-green-600 to-teal-600",
@@ -305,11 +305,11 @@ function Home() {
         </div>
       </section>
 
-      {/* CARROSSEL DE ANÚNCIOS */}
+      {/* CARROSSEL DE ANÚNCIOS - VERSÃO COMPACTADA */}
       <section className="mx-auto max-w-6xl px-3 sm:px-4 -mt-1 sm:-mt-2 relative z-10">
         <div 
           ref={carouselRef}
-          className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg"
+          className="relative overflow-hidden rounded-lg sm:rounded-xl shadow-md" // Border-radius reduzido
         >
           <div 
             className="flex transition-transform duration-500 ease-out"
@@ -318,7 +318,7 @@ function Home() {
             {slides.map((item) => (
               <div
                 key={item.id}
-                className="min-w-full relative h-[180px] sm:h-[240px] md:h-[300px]"
+                className="min-w-full relative h-[140px] sm:h-[180px] md:h-[220px]" // Altura reduzida
               >
                 <div className="absolute inset-0">
                   <img
@@ -330,37 +330,36 @@ function Home() {
                   <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-40`} />
                 </div>
                 
-                <div className="absolute inset-0 flex items-center p-4 sm:p-6 md:p-10">
-                  <div className="max-w-md sm:max-w-lg text-white">
-                    <h2 className="text-lg sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">
+                <div className="absolute inset-0 flex items-center p-3 sm:p-4 md:p-6"> {/* Padding reduzido */}
+                  <div className="max-w-sm sm:max-w-md text-white"> {/* Largura máxima reduzida */}
+                    <h2 className="text-sm sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1.5"> {/* Tamanho da fonte reduzido */}
                       {item.title}
                     </h2>
-                    <p className="text-xs sm:text-sm md:text-base text-white/90 mb-3 sm:mb-4">
+                    <p className="text-[10px] sm:text-xs md:text-sm text-white/90 mb-2 sm:mb-3 line-clamp-2"> {/* Texto menor e com limite */}
                       {item.description}
                     </p>
-                    <a href={item.link}>
-                      <Button 
-                        size="sm" 
-                        className="text-xs sm:text-sm bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/30"
-                      >
-                        {item.cta} →
-                      </Button>
-                    </a>
+                    <Button 
+                      size="sm" 
+                      className="text-[10px] sm:text-xs h-7 sm:h-8 bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/30" // Botão menor
+                    >
+                      {item.cta} →
+                    </Button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2">
+          {/* Indicadores de slide - menores */}
+          <div className="absolute bottom-1.5 sm:bottom-2 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-1.5">
             {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={cn(
-                  "w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full transition-all duration-300",
+                  "w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full transition-all duration-300", // Indicadores menores
                   currentSlide === index 
-                    ? "bg-white w-4 sm:w-6" 
+                    ? "bg-white w-2 sm:w-3" 
                     : "bg-white/40 hover:bg-white/60"
                 )}
                 aria-label={`Ir para slide ${index + 1}`}
@@ -368,19 +367,20 @@ function Home() {
             ))}
           </div>
 
+          {/* Botões de navegação - menores e mais discretos */}
           <button
             onClick={goToPrev}
-            className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-1 sm:p-2 rounded-full backdrop-blur-sm transition-all hidden sm:block"
+            className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-0.5 sm:p-1.5 rounded-full backdrop-blur-sm transition-all hidden sm:block"
             aria-label="Slide anterior"
           >
-            <ChevronLeft className="size-4 sm:size-5" />
+            <ChevronLeft className="size-3 sm:size-4" />
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-1 sm:p-2 rounded-full backdrop-blur-sm transition-all hidden sm:block"
+            className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-0.5 sm:p-1.5 rounded-full backdrop-blur-sm transition-all hidden sm:block"
             aria-label="Próximo slide"
           >
-            <ChevronRight className="size-4 sm:size-5" />
+            <ChevronRight className="size-3 sm:size-4" />
           </button>
         </div>
       </section>
