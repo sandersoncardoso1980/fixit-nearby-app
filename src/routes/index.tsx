@@ -94,6 +94,15 @@ function Home() {
   const { data: proProviders = [] } = useQuery(proProvidersQuery);
   const { data: ads = [] } = useQuery(activeAdsQuery);
 
+  const [search, setSearch] = useState("");
+  const city = CITY_LABEL;
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortKey>("rating");
+  const [compare, setCompare] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [hireTarget, setHireTarget] = useState<Profile | null>(null);
+  const [requestOpen, setRequestOpen] = useState(false);
+
   // Anúncios filtrados pela profissão selecionada (category_id null = geral)
   const filteredAds = useMemo(
     () => ads.filter((a) => !categoryId || !a.category_id || a.category_id === categoryId),
@@ -114,15 +123,6 @@ function Home() {
       color: AD_COLORS[i % AD_COLORS.length]!,
     }));
   }, [filteredAds]);
-
-  const [search, setSearch] = useState("");
-  const city = CITY_LABEL;
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortKey>("rating");
-  const [compare, setCompare] = useState<string[]>([]);
-  const [compareOpen, setCompareOpen] = useState(false);
-  const [hireTarget, setHireTarget] = useState<Profile | null>(null);
-  const [requestOpen, setRequestOpen] = useState(false);
   
   // Estado do carrossel principal
   const [currentSlide, setCurrentSlide] = useState(0);
