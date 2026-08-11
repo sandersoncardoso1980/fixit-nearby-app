@@ -94,9 +94,15 @@ function Home() {
   const { data: proProviders = [] } = useQuery(proProvidersQuery);
   const { data: ads = [] } = useQuery(activeAdsQuery);
 
+  // Anúncios filtrados pela profissão selecionada (category_id null = geral)
+  const filteredAds = useMemo(
+    () => ads.filter((a) => !categoryId || !a.category_id || a.category_id === categoryId),
+    [ads, categoryId],
+  );
+
   const slides = useMemo(() => {
-    if (!ads.length) return CAROUSEL_ITEMS;
-    return ads.map((a, i) => ({
+    if (!filteredAds.length) return CAROUSEL_ITEMS;
+    return filteredAds.map((a, i) => ({
       id: a.id,
       title: a.title,
       description: a.description ?? "",
@@ -107,7 +113,7 @@ function Home() {
       link: a.link_url ?? "#",
       color: AD_COLORS[i % AD_COLORS.length]!,
     }));
-  }, [ads]);
+  }, [filteredAds]);
 
   const [search, setSearch] = useState("");
   const city = CITY_LABEL;
