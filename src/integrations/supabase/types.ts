@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           advertiser_name: string
           amount_paid: number
+          category_id: string | null
           created_at: string
           description: string | null
           expires_at: string | null
@@ -34,6 +35,7 @@ export type Database = {
         Insert: {
           advertiser_name: string
           amount_paid?: number
+          category_id?: string | null
           created_at?: string
           description?: string | null
           expires_at?: string | null
@@ -50,6 +52,7 @@ export type Database = {
         Update: {
           advertiser_name?: string
           amount_paid?: number
+          category_id?: string | null
           created_at?: string
           description?: string | null
           expires_at?: string | null
@@ -63,7 +66,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ads_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categories: {
         Row: {
