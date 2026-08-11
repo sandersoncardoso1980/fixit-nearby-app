@@ -165,7 +165,7 @@ function Home() {
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [isAutoPlaying, slides.length]);
@@ -563,7 +563,7 @@ function Home() {
             <div className="rounded-2xl border border-brand/40 bg-gradient-hero p-3 sm:p-4 text-white shadow-soft">
               <h3 className="text-sm font-semibold">É profissional? Seja PRO</h3>
               <p className="mt-1 text-xs text-white/85">
-                Destaque na tela inicial, selo de verificado e prioridade nas buscas por R$ 19,90/mês.
+                Destaque na tela inicial, selo de verificado e prioridade nas buscas por R$ 49,90/mês.
               </p>
               <Link to="/pro">
                 <Button className="mt-3 w-full" variant="secondary" size="sm">
