@@ -386,7 +386,11 @@ function Home() {
       </section>
 
       <ProBanner
-        providers={proProviders}
+        providers={
+          !categoryId
+            ? proProviders
+            : proProviders.filter((p) => (catsByProvider[p.id] ?? []).includes(categoryId))
+        }
         categories={categories}
         links={links}
         onHire={(p) => startHire(p)}
