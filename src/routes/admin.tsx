@@ -813,6 +813,15 @@ function AdminPage() {
                 />
               </div>
               <div className="grid gap-1.5">
+                <Label htmlFor="ad-exp">Expira em</Label>
+                <Input
+                  id="ad-exp"
+                  type="date"
+                  value={adForm.expires_at}
+                  onChange={(e) => setAdForm((f) => ({ ...f, expires_at: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
                 <Label htmlFor="ad-cat">Profissão alvo (opcional)</Label>
                 <select
                   id="ad-cat"
