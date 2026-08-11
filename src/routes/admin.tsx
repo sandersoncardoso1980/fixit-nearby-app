@@ -220,6 +220,7 @@ function AdminPage() {
         sort_order: adForm.sort_order ? Number(adForm.sort_order) : 0,
         is_active: adForm.is_active,
         expires_at: adForm.expires_at ? new Date(`${adForm.expires_at}T23:59:59`).toISOString() : null,
+        category_id: adForm.category_id || null,
       };
       const { error } = adEditing
         ? await supabase.from("ads").update(payload).eq("id", adEditing.id)
