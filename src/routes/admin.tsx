@@ -813,13 +813,20 @@ function AdminPage() {
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="ad-exp">Expira em</Label>
-                <Input
-                  id="ad-exp"
-                  type="date"
-                  value={adForm.expires_at}
-                  onChange={(e) => setAdForm((f) => ({ ...f, expires_at: e.target.value }))}
-                />
+                <Label htmlFor="ad-cat">Profissão alvo (opcional)</Label>
+                <select
+                  id="ad-cat"
+                  value={adForm.category_id}
+                  onChange={(e) => setAdForm((f) => ({ ...f, category_id: e.target.value }))}
+                  className="h-10 w-full rounded-lg border border-input bg-card px-3 text-sm"
+                >
+                  <option value="">Todas as profissões</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex items-center justify-between rounded-xl border p-3">
