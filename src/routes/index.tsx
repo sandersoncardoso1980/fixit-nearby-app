@@ -467,6 +467,16 @@ function Home() {
               <p className="text-sm font-semibold">
                 Prestadores em {CITY_NAME} ({filtered.length})
               </p>
+              {categoryId && (
+                <button
+                  type="button"
+                  onClick={() => setCategoryId(null)}
+                  className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium hover:bg-accent/70"
+                >
+                  {categories.find((c) => c.id === categoryId)?.name}
+                  <X className="size-3" />
+                </button>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:pb-0">
