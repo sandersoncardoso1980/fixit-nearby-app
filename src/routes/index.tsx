@@ -94,9 +94,24 @@ function Home() {
   const { data: proProviders = [] } = useQuery(proProvidersQuery);
   const { data: ads = [] } = useQuery(activeAdsQuery);
 
+  const [search, setSearch] = useState("");
+  const city = CITY_LABEL;
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortKey>("rating");
+  const [compare, setCompare] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [hireTarget, setHireTarget] = useState<Profile | null>(null);
+  const [requestOpen, setRequestOpen] = useState(false);
+
+  // Anúncios filtrados pela profissão selecionada (category_id null = geral)
+  const filteredAds = useMemo(
+    () => ads.filter((a) => !categoryId || !a.category_id || a.category_id === categoryId),
+    [ads, categoryId],
+  );
+
   const slides = useMemo(() => {
-    if (!ads.length) return CAROUSEL_ITEMS;
-    return ads.map((a, i) => ({
+    if (!filteredAds.length) return CAROUSEL_ITEMS;
+    return filteredAds.map((a, i) => ({
       id: a.id,
       title: a.title,
       description: a.description ?? "",
@@ -107,16 +122,7 @@ function Home() {
       link: a.link_url ?? "#",
       color: AD_COLORS[i % AD_COLORS.length]!,
     }));
-  }, [ads]);
-
-  const [search, setSearch] = useState("");
-  const city = CITY_LABEL;
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortKey>("rating");
-  const [compare, setCompare] = useState<string[]>([]);
-  const [compareOpen, setCompareOpen] = useState(false);
-  const [hireTarget, setHireTarget] = useState<Profile | null>(null);
-  const [requestOpen, setRequestOpen] = useState(false);
+  }, [filteredAds]);
   
   // Estado do carrossel principal
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -380,7 +386,11 @@ function Home() {
       </section>
 
       <ProBanner
-        providers={proProviders}
+        providers={
+          !categoryId
+            ? proProviders
+            : proProviders.filter((p) => (catsByProvider[p.id] ?? []).includes(categoryId))
+        }
         categories={categories}
         links={links}
         onHire={(p) => startHire(p)}
@@ -457,6 +467,16 @@ function Home() {
               <p className="text-sm font-semibold">
                 Prestadores em {CITY_NAME} ({filtered.length})
               </p>
+              {categoryId && (
+                <button
+                  type="button"
+                  onClick={() => setCategoryId(null)}
+                  className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium hover:bg-accent/70"
+                >
+                  {categories.find((c) => c.id === categoryId)?.name}
+                  <X className="size-3" />
+                </button>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:pb-0">

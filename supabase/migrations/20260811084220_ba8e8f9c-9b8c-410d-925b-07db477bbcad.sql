@@ -1,0 +1,2 @@
+ALTER TABLE public.ads ADD COLUMN IF NOT EXISTS category_id uuid REFERENCES public.categories(id) ON DELETE SET NULL;
+COMMENT ON COLUMN public.ads.category_id IS 'Profissao alvo do anuncio; NULL = exibido em todas as categorias.';

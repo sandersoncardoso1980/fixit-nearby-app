@@ -94,6 +94,7 @@ type AdFormState = {
   sort_order: string;
   is_active: boolean;
   expires_at: string;
+  category_id: string;
 };
 
 const EMPTY_AD: AdFormState = {
@@ -107,6 +108,7 @@ const EMPTY_AD: AdFormState = {
   sort_order: "0",
   is_active: true,
   expires_at: "",
+  category_id: "",
 };
 
 type CatFormState = {
@@ -179,6 +181,7 @@ function AdminPage() {
             sort_order: String(adEditing.sort_order ?? 0),
             is_active: adEditing.is_active,
             expires_at: adEditing.expires_at ? adEditing.expires_at.slice(0, 10) : "",
+            category_id: adEditing.category_id ?? "",
           }
         : EMPTY_AD,
     );
@@ -217,6 +220,7 @@ function AdminPage() {
         sort_order: adForm.sort_order ? Number(adForm.sort_order) : 0,
         is_active: adForm.is_active,
         expires_at: adForm.expires_at ? new Date(`${adForm.expires_at}T23:59:59`).toISOString() : null,
+        category_id: adForm.category_id || null,
       };
       const { error } = adEditing
         ? await supabase.from("ads").update(payload).eq("id", adEditing.id)
@@ -816,6 +820,22 @@ function AdminPage() {
                   value={adForm.expires_at}
                   onChange={(e) => setAdForm((f) => ({ ...f, expires_at: e.target.value }))}
                 />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="ad-cat">Profissão alvo (opcional)</Label>
+                <select
+                  id="ad-cat"
+                  value={adForm.category_id}
+                  onChange={(e) => setAdForm((f) => ({ ...f, category_id: e.target.value }))}
+                  className="h-10 w-full rounded-lg border border-input bg-card px-3 text-sm"
+                >
+                  <option value="">Todas as profissões</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex items-center justify-between rounded-xl border p-3">
