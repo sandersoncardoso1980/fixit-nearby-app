@@ -181,6 +181,7 @@ function AdminPage() {
             sort_order: String(adEditing.sort_order ?? 0),
             is_active: adEditing.is_active,
             expires_at: adEditing.expires_at ? adEditing.expires_at.slice(0, 10) : "",
+            category_id: adEditing.category_id ?? "",
           }
         : EMPTY_AD,
     );
