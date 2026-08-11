@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://fixit-nearby-app.lovable.app/sitemap.xml
