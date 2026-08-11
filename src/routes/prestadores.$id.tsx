@@ -12,18 +12,96 @@ import { brl, CITY_LABEL } from "@/lib/geo";
 import { isProActive } from "@/lib/pro";
 import { supabase } from "@/integrations/supabase/client";
 
+const SITE = "https://fixit-nearby-app.lovable.app";
+
 export const Route = createFileRoute("/prestadores/$id")({
-  head: () => ({
-    meta: [
-      { title: "Perfil do profissional — ServiçoJá" },
-      {
-        name: "description",
-        content: "Veja portfólio, avaliações, preço por hora e serviços antes de contratar.",
+  loader: async ({ context, params }) => {
+    const [provider, cats, links] = await Promise.all([
+      context.queryClient.ensureQueryData(providerQuery(params.id)),
+      context.queryClient.ensureQueryData(categoriesQuery),
+      context.queryClient.ensureQueryData(providerCategoriesQuery),
+    ]);
+    if (!provider) return { provider: null, categoryName: null };
+    const cat = cats.find((c) =>
+      links.some((l) => l.provider_id === provider.id && l.category_id === c.id),
+    );
+    return {
+      provider: {
+        name: provider.full_name,
+        bio: provider.bio ?? null,
+        avatar: provider.avatar_url ?? null,
+        rating: provider.rating_avg,
+        reviews: provider.total_reviews,
+        jobs: provider.jobs_done,
       },
-      { property: "og:title", content: "Perfil do profissional — ServiçoJá" },
-      { property: "og:description", content: "Portfólio, avaliações e preços do profissional." },
-    ],
-  }),
+      categoryName: cat?.name ?? null,
+    };
+  },
+  head: ({ params, loaderData }) => {
+    const url = `${SITE}/prestadores/${params.id}`;
+    const p = loaderData?.provider;
+    if (!p) {
+      return {
+        meta: [
+          { title: "Profissional não encontrado — ServiçoJá" },
+          {
+            name: "description",
+            content:
+              "Este perfil não está disponível. Veja outros profissionais em Entre Rios de Minas na ServiçoJá.",
+          },
+        ],
+        links: [{ rel: "canonical", href: url }],
+      };
+    }
+    const cat = loaderData?.categoryName ?? "Profissional";
+    const title = `${p.name} — ${cat} em Entre Rios de Minas`.slice(0, 60);
+    const description = (
+      p.bio?.trim()
+        ? `${p.name}, ${cat} em Entre Rios de Minas. ${p.bio.trim()}`
+        : `${p.name} é ${cat} em Entre Rios de Minas, com nota ${p.rating.toFixed(1)} em ${p.reviews} avaliações e ${p.jobs} serviços concluídos. Peça um orçamento.`
+    ).slice(0, 158);
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+        ...(p.avatar?.startsWith("https://")
+          ? [
+              { property: "og:image", content: p.avatar },
+              { name: "twitter:image", content: p.avatar },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ProfessionalService",
+            name: p.name,
+            description,
+            ...(p.avatar ? { image: p.avatar } : {}),
+            url,
+            areaServed: "Entre Rios de Minas, MG",
+            ...(p.reviews > 0
+              ? {
+                  aggregateRating: {
+                    "@type": "AggregateRating",
+                    ratingValue: p.rating,
+                    reviewCount: p.reviews,
+                  },
+                }
+              : {}),
+          }),
+        },
+      ],
+    };
+  },
   component: ProviderProfile,
 });
 

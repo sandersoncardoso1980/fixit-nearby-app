@@ -48,7 +48,7 @@ export function ProBanner({
               <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
                 <img
                   src={p.avatar_url ?? ""}
-                  alt={`Foto de ${p.full_name}`}
+                  alt={`${cat ? `${cat.name} ` : "Profissional "}${p.full_name} em Entre Rios de Minas`}
                   loading="lazy"
                   className="size-16 rounded-xl object-cover ring-2 ring-brand/40"
                 />

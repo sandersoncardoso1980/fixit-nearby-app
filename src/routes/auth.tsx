@@ -86,7 +86,7 @@ function AuthPage() {
           <Hammer className="size-5" />
         </span>
         <h1 className="text-2xl font-extrabold">
-          Serviço<span className="text-brand">Já</span>
+          Entrar ou criar conta no Serviço<span className="text-brand">Já</span>
         </h1>
         <p className="text-sm text-muted-foreground">
           Contrate ou ofereça serviços na sua região.

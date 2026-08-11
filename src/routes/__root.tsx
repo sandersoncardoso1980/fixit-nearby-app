@@ -102,6 +102,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "ServiçoJá",
+            url: "https://fixit-nearby-app.lovable.app",
+            description:
+              "Plataforma que conecta clientes a profissionais de serviços em Entre Rios de Minas, MG.",
+            areaServed: "Entre Rios de Minas, MG",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "ServiçoJá",
+            url: "https://fixit-nearby-app.lovable.app",
+          },
+        ]),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
