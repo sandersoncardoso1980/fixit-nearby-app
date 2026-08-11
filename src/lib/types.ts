@@ -44,6 +44,7 @@ export type Ad = {
   amount_paid: number;
   sort_order: number;
   is_active: boolean;
+  category_id: string | null;
   starts_at: string;
   expires_at: string | null;
   created_at: string;
