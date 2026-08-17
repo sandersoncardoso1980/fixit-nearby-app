@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Hammer, Moon, Sun, LogOut, User, Menu } from "lucide-react";
+import { Hammer, Moon, Sun, LogOut, Menu, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,25 +14,16 @@ import { useTheme } from "@/lib/theme";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function Header() {
-  const { profile, userId, isAdmin, signOut } = useAuth();
+  const { isAdmin, userId, signOut } = useAuth();
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const baseLinks =
-    profile?.role === "provider"
-      ? [
-          { to: "/", label: "Explorar" },
-          { to: "/prestador", label: "Painel do prestador" },
-          { to: "/pro", label: "Plano PRO" },
-        ]
-      : [
-          { to: "/", label: "Explorar" },
-          { to: "/pedidos", label: "Meus pedidos" },
-          { to: "/pro", label: "Plano PRO" },
-        ];
-
-  const links = isAdmin ? [...baseLinks, { to: "/admin", label: "Admin" }] : baseLinks;
+  const links: { to: "/" | "/pro" | "/admin"; label: string }[] = [
+    { to: "/", label: "Explorar" },
+    { to: "/pro", label: "Plano PRO" },
+    ...(isAdmin ? ([{ to: "/admin" as const, label: "Admin" }]) : []),
+  ];
 
   async function handleSignOut() {
     await qc.cancelQueries();
@@ -71,29 +62,18 @@ export function Header() {
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>
 
-          {userId ? (
+          {userId && isAdmin ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Minha conta">
-                  {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="size-7 rounded-full object-cover" />
-                  ) : (
-                    <User />
-                  )}
+                <Button variant="ghost" size="icon" aria-label="Administração">
+                  <ShieldCheck />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="truncate">
-                  {profile?.full_name || "Minha conta"}
-                </DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuLabel>Administrador</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {links.map((l) => (
-                  <DropdownMenuItem key={l.to} asChild>
-                    <Link to={l.to}>{l.label}</Link>
-                  </DropdownMenuItem>
-                ))}
                 <DropdownMenuItem asChild>
-                  <Link to="/perfil">Meu perfil</Link>
+                  <Link to="/admin">Painel admin</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
@@ -101,16 +81,7 @@ export function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <>
-              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link to="/auth">Entrar</Link>
-              </Button>
-              <Button asChild variant="brand" size="sm">
-                <Link to="/auth">Criar conta</Link>
-              </Button>
-            </>
-          )}
+          ) : null}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
