@@ -564,17 +564,11 @@ function Home() {
             <div className="rounded-2xl border bg-card p-3 sm:p-4 shadow-soft">
               <h3 className="text-sm font-semibold">Não sabe quem chamar?</h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Publique um chamado aberto e receba propostas dos prestadores da cidade.
+                Escolha a profissão acima e fale direto no WhatsApp com os profissionais de{" "}
+                {CITY_NAME}. Sem cadastro, sem intermediários.
               </p>
-              <Button
-                className="mt-3 w-full text-xs sm:text-sm"
-                variant="outline"
-                size="sm"
-                onClick={() => startHire(null)}
-              >
-                Publicar chamado aberto
-              </Button>
             </div>
+
           </aside>
         </div>
       </section>
