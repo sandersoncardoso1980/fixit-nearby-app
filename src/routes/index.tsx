@@ -31,7 +31,6 @@ import {
 } from "@/lib/queries";
 import { isProActive } from "@/lib/pro";
 import { CITY_LABEL, CITY_NAME } from "@/lib/geo";
-import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -64,7 +63,6 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "online", label: "Disponível agora" },
 ];
 
-// Slides de fallback quando ainda não há anunciantes cadastrados no BD
 const CAROUSEL_ITEMS = [
   {
     id: "fallback-1",
@@ -102,6 +100,15 @@ const AD_COLORS = [
   "from-purple-600 to-pink-600",
 ];
 
+// Helper para remover acentos e caracteres especiais das buscas
+function normalizeText(text: string | null | undefined): string {
+  if (!text) return "";
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 function Home() {
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: providers = [], isLoading } = useQuery(providersQuery);
@@ -116,13 +123,11 @@ function Home() {
   const [compare, setCompare] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
 
-  // Anúncios filtrados pela profissão/categoria selecionada
   const filteredAds = useMemo(
     () => ads.filter((a) => !categoryId || !a.category_id || a.category_id === categoryId),
     [ads, categoryId]
   );
 
-  // Monta os slides unindo o Banco de Dados com fallback
   const slides = useMemo(() => {
     if (!filteredAds.length) return CAROUSEL_ITEMS;
     return filteredAds.map((a, i) => ({
@@ -138,25 +143,21 @@ function Home() {
     }));
   }, [filteredAds]);
 
-  // Estado e refs do carrossel principal
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const carouselRef = useRef<HTMLDivElement>(null);
   const interactionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Estado e refs do carrossel de categorias
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  // Reseta o slide atual caso a lista de slides diminua de tamanho
   useEffect(() => {
     if (currentSlide >= slides.length) {
       setCurrentSlide(0);
     }
   }, [slides.length, currentSlide]);
 
-  // Auto-play do carrossel principal
   useEffect(() => {
     if (!isAutoPlaying || slides.length === 0) return;
 
@@ -167,14 +168,12 @@ function Home() {
     return () => clearInterval(interval);
   }, [isAutoPlaying, slides.length]);
 
-  // Limpeza de timers ao desmontar o componente
   useEffect(() => {
     return () => {
       if (interactionTimeoutRef.current) clearTimeout(interactionTimeoutRef.current);
     };
   }, []);
 
-  // Pausa o auto-play temporariamente durante a interação do usuário
   const handleUserInteraction = useCallback(() => {
     setIsAutoPlaying(false);
     if (interactionTimeoutRef.current) {
@@ -200,7 +199,6 @@ function Home() {
     handleUserInteraction();
   };
 
-  // Funções de verificação e rolagem horizontal de categorias
   const checkArrowsVisibility = useCallback(() => {
     if (categoriesScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = categoriesScrollRef.current;
@@ -239,18 +237,39 @@ function Home() {
     return map;
   }, [links]);
 
+  // BUSCA COMPLETA E INTELIGENTE
   const filtered = useMemo(() => {
-    const term = search.trim().toLowerCase();
+    const term = normalizeText(search.trim());
+
+    // Divide os termos digitados por espaço (permite buscar "manicure unha")
+    const searchTerms = term.split(/\s+/).filter(Boolean);
+
     const list = providers.filter((p) => {
+      // Filtro por Categoria Selecionada
       if (categoryId && !(catsByProvider[p.id] ?? []).includes(categoryId)) return false;
+
+      // Filtro Disponível Agora
       if (sort === "online" && !p.is_online) return false;
-      if (term) {
-        const catNames = (catsByProvider[p.id] ?? [])
-          .map((id) => categories.find((c) => c.id === id)?.name ?? "")
-          .join(" ");
-        const haystack = `${p.full_name ?? ""} ${p.bio ?? ""} ${catNames}`.toLowerCase();
-        if (!haystack.includes(term)) return false;
+
+      // Filtro por Texto da Busca
+      if (searchTerms.length > 0) {
+        const providerCatObjects = (catsByProvider[p.id] ?? [])
+          .map((id) => categories.find((c) => c.id === id))
+          .filter(Boolean);
+
+        const categoryNames = providerCatObjects.map((c) => c?.name).join(" ");
+        const categoryDescriptions = providerCatObjects.map((c) => c?.description).join(" ");
+
+        // Agrupa todas as informações do profissional em um único bloco textual de busca
+        const searchableHaystack = normalizeText(
+          `${p.full_name ?? ""} ${p.bio ?? ""} ${p.city ?? ""} ${categoryNames} ${categoryDescriptions}`
+        );
+
+        // Garante que TODOS os termos digitados na busca estejam presentes na informação
+        const matches = searchTerms.every((t) => searchableHaystack.includes(t));
+        if (!matches) return false;
       }
+
       return true;
     });
 
@@ -294,9 +313,18 @@ function Home() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Qual serviço você precisa?"
+                placeholder="Busque por nome, profissão ou serviço (ex: manicure, pintura...)"
                 className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 text-sm"
               />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
             </div>
             <div className="flex min-w-0 items-center gap-2 rounded-xl px-2 sm:px-3 sm:border-l">
               <MapPin className="size-4 shrink-0 text-muted-foreground" />
@@ -326,7 +354,7 @@ function Home() {
         </div>
       </section>
 
-      {/* CARROSSEL DE ANÚNCIOS - IMAGENS DINÂMICAS DO BANCO DE DADOS */}
+      {/* CARROSSEL DE ANÚNCIOS */}
       <section className="mx-auto max-w-6xl px-3 sm:px-4 -mt-1 sm:-mt-2 relative z-10">
         <div ref={carouselRef} className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg">
           <div
@@ -568,7 +596,6 @@ function Home() {
                 {CITY_NAME}. Sem cadastro, sem intermediários.
               </p>
             </div>
-
           </aside>
         </div>
       </section>
