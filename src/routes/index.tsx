@@ -22,7 +22,6 @@ import { ProviderCard } from "@/components/ProviderCard";
 import { ProBanner } from "@/components/ProBanner";
 import { CompareDialog } from "@/components/CompareDialog";
 import { PriceCalculator } from "@/components/PriceCalculator";
-import { RequestDialog } from "@/components/RequestDialog";
 import {
   activeAdsQuery,
   categoriesQuery,
@@ -116,8 +115,6 @@ function Home() {
   const [sort, setSort] = useState<SortKey>("rating");
   const [compare, setCompare] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
-  const [hireTarget, setHireTarget] = useState<Profile | null>(null);
-  const [requestOpen, setRequestOpen] = useState(false);
 
   // Anúncios filtrados pela profissão/categoria selecionada
   const filteredAds = useMemo(
@@ -269,11 +266,6 @@ function Home() {
   const compareProviders = useMemo(() => {
     return providers.filter((p) => compare.includes(p.id));
   }, [providers, compare]);
-
-  function startHire(p: Profile | null) {
-    setHireTarget(p);
-    setRequestOpen(true);
-  }
 
   function toggleCompare(id: string) {
     setCompare((prev) =>
@@ -429,7 +421,6 @@ function Home() {
         }
         categories={categories}
         links={links}
-        onHire={(p) => startHire(p)}
       />
 
       {/* CARROSSEL DE CATEGORIAS */}
@@ -546,7 +537,6 @@ function Home() {
                     )}
                     selected={compare.includes(p.id)}
                     onToggleCompare={() => toggleCompare(p.id)}
-                    onHire={() => startHire(p)}
                   />
                 ))}
             </div>
@@ -574,17 +564,11 @@ function Home() {
             <div className="rounded-2xl border bg-card p-3 sm:p-4 shadow-soft">
               <h3 className="text-sm font-semibold">Não sabe quem chamar?</h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Publique um chamado aberto e receba propostas dos prestadores da cidade.
+                Escolha a profissão acima e fale direto no WhatsApp com os profissionais de{" "}
+                {CITY_NAME}. Sem cadastro, sem intermediários.
               </p>
-              <Button
-                className="mt-3 w-full text-xs sm:text-sm"
-                variant="outline"
-                size="sm"
-                onClick={() => startHire(null)}
-              >
-                Publicar chamado aberto
-              </Button>
             </div>
+
           </aside>
         </div>
       </section>
@@ -630,13 +614,6 @@ function Home() {
       )}
 
       <CompareDialog providers={compareProviders} open={compareOpen} onOpenChange={setCompareOpen} />
-      <RequestDialog
-        provider={hireTarget}
-        categories={categories}
-        defaultCategoryId={categoryId ?? undefined}
-        open={requestOpen}
-        onOpenChange={setRequestOpen}
-      />
     </>
   );
 }

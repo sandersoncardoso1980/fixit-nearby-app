@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StarRating } from "@/components/StarRating";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { brl } from "@/lib/geo";
 import type { Category, Profile } from "@/lib/types";
 import { isProActive } from "@/lib/pro";
@@ -15,14 +16,12 @@ export function ProviderCard({
   categories,
   selected,
   onToggleCompare,
-  onHire,
 }: {
   provider: Profile;
   distance?: number;
   categories: Category[];
   selected: boolean;
   onToggleCompare: () => void;
-  onHire: () => void;
 }) {
   const pro = isProActive(provider);
   
@@ -117,9 +116,11 @@ export function ProviderCard({
               Perfil
             </Link>
           </Button>
-          <Button variant="brand" size="sm" onClick={onHire}>
-            Solicitar
-          </Button>
+          <WhatsAppButton
+            provider={provider}
+            categoryName={categories[0]?.name ?? null}
+            label="Solicitar"
+          />
         </div>
       </div>
     </article>

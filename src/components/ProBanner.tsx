@@ -3,18 +3,17 @@ import { BadgeCheck, Crown, MapPin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { brl, CITY_NAME } from "@/lib/geo";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import type { Category, Profile } from "@/lib/types";
 
 export function ProBanner({
   providers,
   categories,
   links,
-  onHire,
 }: {
   providers: Profile[];
   categories: Category[];
   links: { provider_id: string; category_id: string }[];
-  onHire: (p: Profile) => void;
 }) {
   if (providers.length === 0) return null;
 
@@ -94,9 +93,7 @@ export function ProBanner({
                       Perfil
                     </Link>
                   </Button>
-                  <Button variant="brand" size="sm" onClick={() => onHire(p)}>
-                    Solicitar
-                  </Button>
+                  <WhatsAppButton provider={p} categoryName={cat?.name ?? null} label="Solicitar" />
                 </div>
               </div>
             </article>

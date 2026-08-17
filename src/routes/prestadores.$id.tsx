@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, Clock, Crown, Eye, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StarRating } from "@/components/StarRating";
-import { RequestDialog } from "@/components/RequestDialog";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { categoriesQuery, providerCategoriesQuery, providerQuery, reviewsQuery } from "@/lib/queries";
 import { brl, CITY_LABEL } from "@/lib/geo";
 import { isProActive } from "@/lib/pro";
@@ -111,7 +110,6 @@ function ProviderProfile() {
   const { data: reviews = [] } = useQuery(reviewsQuery(id));
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: links = [] } = useQuery(providerCategoriesQuery);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     void supabase.rpc("register_profile_view", { _provider_id: id });
@@ -189,15 +187,12 @@ function ProviderProfile() {
             <span className="text-lg font-extrabold">{brl(provider.hourly_rate)}</span>
             <span className="text-muted-foreground"> /hora</span>
           </p>
-          <Button
-            variant="brand"
-            onClick={() => {
-              void supabase.rpc("register_contact", { _provider_id: provider.id });
-              setOpen(true);
-            }}
-          >
-            Solicitar orçamento
-          </Button>
+          <WhatsAppButton
+            provider={provider}
+            categoryName={cats[0]?.name ?? null}
+            size="default"
+            label="Solicitar orçamento no WhatsApp"
+          />
         </div>
       </div>
 
@@ -243,7 +238,6 @@ function ProviderProfile() {
         </div>
       </section>
 
-      <RequestDialog provider={provider} categories={categories} open={open} onOpenChange={setOpen} />
     </div>
   );
 }
