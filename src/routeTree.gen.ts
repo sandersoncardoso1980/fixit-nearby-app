@@ -12,9 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as PedidosRouteImport } from './routes/pedidos'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as PrestadorRouteImport } from './routes/prestador'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrestadoresIdRouteImport } from './routes/prestadores.$id'
@@ -32,21 +29,6 @@ const AdminRoute = AdminRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PedidosRoute = PedidosRouteImport.update({
-  id: '/pedidos',
-  path: '/pedidos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrestadorRoute = PrestadorRouteImport.update({
-  id: '/prestador',
-  path: '/prestador',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProRoute = ProRouteImport.update({
@@ -69,9 +51,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
-  '/prestador': typeof PrestadorRoute
   '/pro': typeof ProRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/prestadores/$id': typeof PrestadoresIdRoute
@@ -80,9 +59,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
-  '/prestador': typeof PrestadorRoute
   '/pro': typeof ProRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/prestadores/$id': typeof PrestadoresIdRoute
@@ -92,9 +68,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
-  '/prestador': typeof PrestadorRoute
   '/pro': typeof ProRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/prestadores/$id': typeof PrestadoresIdRoute
@@ -102,34 +75,14 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/admin'
-    | '/auth'
-    | '/pedidos'
-    | '/perfil'
-    | '/prestador'
-    | '/pro'
-    | '/sitemap.xml'
-    | '/prestadores/$id'
+    '/' | '/admin' | '/auth' | '/pro' | '/sitemap.xml' | '/prestadores/$id'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/admin'
-    | '/auth'
-    | '/pedidos'
-    | '/perfil'
-    | '/prestador'
-    | '/pro'
-    | '/sitemap.xml'
-    | '/prestadores/$id'
+  to: '/' | '/admin' | '/auth' | '/pro' | '/sitemap.xml' | '/prestadores/$id'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/auth'
-    | '/pedidos'
-    | '/perfil'
-    | '/prestador'
     | '/pro'
     | '/sitemap.xml'
     | '/prestadores/$id'
@@ -139,9 +92,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
-  PedidosRoute: typeof PedidosRoute
-  PerfilRoute: typeof PerfilRoute
-  PrestadorRoute: typeof PrestadorRoute
   ProRoute: typeof ProRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   PrestadoresIdRoute: typeof PrestadoresIdRoute
@@ -168,27 +118,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pedidos': {
-      id: '/pedidos'
-      path: '/pedidos'
-      fullPath: '/pedidos'
-      preLoaderRoute: typeof PedidosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/prestador': {
-      id: '/prestador'
-      path: '/prestador'
-      fullPath: '/prestador'
-      preLoaderRoute: typeof PrestadorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pro': {
@@ -219,9 +148,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
-  PedidosRoute: PedidosRoute,
-  PerfilRoute: PerfilRoute,
-  PrestadorRoute: PrestadorRoute,
   ProRoute: ProRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   PrestadoresIdRoute: PrestadoresIdRoute,
