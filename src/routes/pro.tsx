@@ -1,17 +1,9 @@
-import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { BadgeCheck, Check, Copy, Crown, Eye, MessageCircle, Phone } from "lucide-react";
+import { Check, Copy, Crown, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
-import { myProRequestsQuery } from "@/lib/queries";
-import { PRO_BENEFITS, PRO_PAYMENT, PRO_PRICE_LABEL, isProActive } from "@/lib/pro";
+import { PRO_BENEFITS, PRO_PAYMENT, PRO_PRICE_LABEL } from "@/lib/pro";
 import { CITY_NAME } from "@/lib/geo";
 
 export const Route = createFileRoute("/pro")({
@@ -43,26 +35,8 @@ function ProPage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const active = profile ? isProActive(profile) : false;
   const pending = myRequests.some((r) => r.status === "pending");
 
-  async function submit() {
-    if (!profile) return;
-    setBusy(true);
-    const { error } = await supabase.from("pro_requests").insert({
-      provider_id: profile.id,
-      contact_phone: phone.trim().slice(0, 20) || profile.phone,
-      message: message.trim().slice(0, 400) || null,
-    });
-    setBusy(false);
-    if (error) {
-      toast.error("Não foi possível enviar sua solicitação.");
-      return;
-    }
-    setMessage("");
-    void qc.invalidateQueries({ queryKey: ["my-pro-requests"] });
-    toast.success("Solicitação enviada! Faça o Pix e o administrador ativará seu PRO.");
-  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
@@ -90,7 +64,7 @@ function ProPage() {
         <h2 className="text-lg font-bold">Como funciona</h2>
         <ol className="mt-3 space-y-2 text-sm text-muted-foreground">
           <li>1. Faça o Pix de {PRO_PRICE_LABEL} para a chave abaixo.</li>
-          <li>2. Envie sua solicitação de ativação nesta página.</li>
+          <li>2. Avise a administração pelo WhatsApp com seu nome e profissão.</li>
           <li>3. O administrador confirma o pagamento e ativa seu selo PRO por 30 dias.</li>
         </ol>
 
@@ -128,89 +102,23 @@ function ProPage() {
 
       <section className="mt-8 rounded-2xl border bg-card p-5 shadow-soft">
         <h2 className="text-lg font-bold">Ativar meu PRO</h2>
-
-        {!profile && (
-          <div className="mt-3">
-            <p className="text-sm text-muted-foreground">
-              Entre com sua conta de profissional para solicitar a ativação.
-            </p>
-            <Button asChild variant="brand" className="mt-3">
-              <Link to="/auth">Entrar</Link>
-            </Button>
-          </div>
-        )}
-
-        {profile && profile.role !== "provider" && (
-          <p className="mt-3 text-sm text-muted-foreground">
-            O plano PRO é exclusivo para contas de profissional.
-          </p>
-        )}
-
-        {profile?.role === "provider" && active && (
-          <div className="mt-3 rounded-xl border border-brand/40 bg-accent p-4 text-sm">
-            <p className="flex items-center gap-2 font-semibold">
-              <BadgeCheck className="size-4 text-brand" /> Seu plano PRO está ativo
-            </p>
-            {profile.pro_expires_at && (
-              <p className="mt-1 text-muted-foreground">
-                Válido até {new Date(profile.pro_expires_at).toLocaleDateString("pt-BR")}.
-              </p>
-            )}
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <Stat icon={<Eye className="size-3.5" />} label="Visualizações" value={profile.profile_views} />
-              <Stat icon={<Phone className="size-3.5" />} label="Contatos" value={profile.contact_count} />
-            </div>
-          </div>
-        )}
-
-        {profile?.role === "provider" && !active && (
-          <div className="mt-3 space-y-3">
-            {pending ? (
-              <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-                Sua solicitação foi enviada e está aguardando a confirmação do pagamento.
-              </p>
-            ) : (
-              <>
-                <div className="grid gap-1.5">
-                  <Label htmlFor="pro-phone">Telefone para contato</Label>
-                  <Input
-                    id="pro-phone"
-                    maxLength={20}
-                    value={phone}
-                    placeholder={profile.phone ?? "(31) 90000-0000"}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                </div>
-                <div className="grid gap-1.5">
-                  <Label htmlFor="pro-msg">Mensagem (opcional)</Label>
-                  <Textarea
-                    id="pro-msg"
-                    rows={3}
-                    maxLength={400}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Ex.: Pix feito às 10h no valor de R$ 49,90."
-                  />
-                </div>
-                <Button variant="brand" className="w-full" disabled={busy} onClick={() => void submit()}>
-                  {busy ? "Enviando…" : "Solicitar ativação do PRO"}
-                </Button>
-              </>
-            )}
-          </div>
-        )}
+        <p className="mt-2 text-sm text-muted-foreground">
+          Não é preciso criar conta. Faça o Pix e fale com a administração pelo WhatsApp informando
+          seu nome e profissão — seu perfil é destacado em seguida.
+        </p>
+        <Button asChild variant="brand" className="mt-4 w-full sm:w-auto">
+          <a
+            href={`https://wa.me/${PRO_PAYMENT.whatsapp}?text=${encodeURIComponent(
+              "Olá! Quero ativar o Plano PRO do ServiçoJá. Meu nome é ___ e minha profissão é ___.",
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <MessageCircle /> Ativar PRO pelo WhatsApp
+          </a>
+        </Button>
       </section>
     </div>
   );
 }
 
-function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
-  return (
-    <div className="rounded-xl border bg-card p-3">
-      <p className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-        {icon} {label}
-      </p>
-      <p className="mt-0.5 text-xl font-extrabold">{value}</p>
-    </div>
-  );
-}
