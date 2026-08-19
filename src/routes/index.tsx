@@ -283,83 +283,26 @@ function Home() {
         {/* Glow de fundo */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-primary/20 blur-[120px] pointer-events-none rounded-full" />
 
-        <div className="mx-auto max-w-6xl px-3 sm:px-4 relative z-10 space-y-6 sm:space-y-8">
-          
-          {/* Header do Hero */}
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <Badge className="border-primary/30 bg-primary/10 text-primary-foreground hover:bg-primary/20 backdrop-blur-md px-3 py-1 text-xs sm:text-sm font-medium rounded-full inline-flex items-center gap-1.5">
-              <Sparkles className="size-3.5 text-primary" /> Profissionais verificados da cidade
+        <div className="mx-auto max-w-6xl px-3 sm:px-4 relative z-10 space-y-5 sm:space-y-6">
+
+          {/* Header do Hero (texto reduzido) */}
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <Badge className="border-primary/30 bg-primary/10 text-primary-foreground hover:bg-primary/20 backdrop-blur-md px-2.5 py-0.5 text-[10px] sm:text-xs font-medium rounded-full inline-flex items-center gap-1.5">
+              <Sparkles className="size-3 text-primary" /> Profissionais verificados da cidade
             </Badge>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">
               Um profissional de confiança, <br className="hidden sm:inline" />
               <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
                 a poucos minutos de você.
               </span>
             </h1>
-            <p className="text-xs sm:text-sm md:text-base text-slate-300 max-w-xl mx-auto">
+            <p className="text-[11px] sm:text-xs md:text-sm text-slate-300 max-w-lg mx-auto">
               Descreva o serviço, compare orçamentos e contrate os melhores prestadores locais sem complicação.
             </p>
           </div>
 
-          {/* BARRA DE BUSCA PRINCIPAL */}
-          <div className="max-w-4xl mx-auto">
-            <div className="p-1.5 sm:p-2 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 shadow-2xl transition-all focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/20">
-              <div className="grid gap-2 grid-cols-1 sm:grid-cols-[1fr_auto_auto] items-center bg-card rounded-xl p-2 text-foreground shadow-inner">
-                
-                {/* Input de texto */}
-                <div className="flex items-center gap-2 px-3 py-1">
-                  <Search className="size-5 text-muted-foreground shrink-0" />
-                  <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="O que você precisa hoje? (ex: pintor, eletricista, vazamento...)"
-                    className="border-0 bg-transparent px-0 text-sm sm:text-base shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/70"
-                  />
-                  {search && (
-                    <button
-                      type="button"
-                      onClick={() => setSearch("")}
-                      className="p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-accent transition-colors"
-                    >
-                      <X className="size-4" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Localização */}
-                <div className="flex items-center gap-2 px-3 py-2 border-t sm:border-t-0 sm:border-l border-border/60 text-muted-foreground">
-                  <MapPin className="size-4 shrink-0 text-primary" />
-                  <span className="text-xs sm:text-sm font-semibold whitespace-nowrap text-foreground">{city}</span>
-                </div>
-
-                {/* Botão de busca */}
-                <Button
-                  variant="brand"
-                  size="lg"
-                  className="w-full sm:w-auto px-6 font-semibold shadow-md hover:shadow-primary/25 transition-all"
-                  onClick={() => document.getElementById("resultados")?.scrollIntoView({ behavior: "smooth" })}
-                >
-                  Buscar
-                </Button>
-              </div>
-            </div>
-
-            {/* Micro Badges abaixo da Busca */}
-            <ul className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] sm:text-xs text-slate-400">
-              <li className="flex items-center gap-1.5">
-                <ShieldCheck className="size-4 text-emerald-400" /> Profissionais avaliados
-              </li>
-              <li className="flex items-center gap-1.5">
-                <Clock className="size-4 text-blue-400" /> Resposta rápida
-              </li>
-              <li className="flex items-center gap-1.5">
-                <Wallet className="size-4 text-amber-400" /> Sem taxas ocultas
-              </li>
-            </ul>
-          </div>
-
           {/* CARROSSEL DE ANÚNCIOS / PROMOÇÕES */}
-          <div className="pt-2">
+          <div>
             <div className="relative group overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-2xl">
               
               {/* Slides Container */}
@@ -457,6 +400,63 @@ function Home() {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* BARRA DE BUSCA PRINCIPAL */}
+          <div className="max-w-4xl mx-auto">
+            <div className="p-1.5 sm:p-2 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 shadow-2xl transition-all focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/20">
+              <div className="grid gap-2 grid-cols-1 sm:grid-cols-[1fr_auto_auto] items-center bg-card rounded-xl p-2 text-foreground shadow-inner">
+                
+                {/* Input de texto */}
+                <div className="flex items-center gap-2 px-3 py-1">
+                  <Search className="size-5 text-muted-foreground shrink-0" />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="O que você precisa hoje? (ex: pintor, eletricista, vazamento...)"
+                    className="border-0 bg-transparent px-0 text-sm sm:text-base shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/70"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-accent transition-colors"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Localização */}
+                <div className="flex items-center gap-2 px-3 py-2 border-t sm:border-t-0 sm:border-l border-border/60 text-muted-foreground">
+                  <MapPin className="size-4 shrink-0 text-primary" />
+                  <span className="text-xs sm:text-sm font-semibold whitespace-nowrap text-foreground">{city}</span>
+                </div>
+
+                {/* Botão de busca */}
+                <Button
+                  variant="brand"
+                  size="lg"
+                  className="w-full sm:w-auto px-6 font-semibold shadow-md hover:shadow-primary/25 transition-all"
+                  onClick={() => document.getElementById("resultados")?.scrollIntoView({ behavior: "smooth" })}
+                >
+                  Buscar
+                </Button>
+              </div>
+            </div>
+
+            {/* Micro Badges abaixo da Busca */}
+            <ul className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] sm:text-xs text-slate-400">
+              <li className="flex items-center gap-1.5">
+                <ShieldCheck className="size-4 text-emerald-400" /> Profissionais avaliados
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Clock className="size-4 text-blue-400" /> Resposta rápida
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Wallet className="size-4 text-amber-400" /> Sem taxas ocultas
+              </li>
+            </ul>
           </div>
 
         </div>
