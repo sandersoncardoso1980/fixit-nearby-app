@@ -316,11 +316,20 @@ function Home() {
                   return (
                     <div key={item.id} className="min-w-full relative h-[220px] sm:h-[280px] md:h-[340px] flex items-center">
                       
-                      {/* Imagem de Fundo com Tratamento de Luz */}
+                      {/* Camada de fundo desfocada (preenche o espaço sem cortar a imagem principal) */}
+                      <img
+                        src={item.image}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 w-full h-full object-cover object-center scale-110 blur-2xl opacity-60"
+                        loading="lazy"
+                      />
+
+                      {/* Imagem principal, sempre visível por completo (sem corte no topo/base) */}
                       <img
                         src={item.image}
                         alt={item.title}
-                        className="absolute inset-0 w-full h-full object-cover object-center scale-105 transition-transform duration-1000 group-hover:scale-100"
+                        className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-1000 group-hover:scale-[1.02]"
                         loading="lazy"
                       />
                       
